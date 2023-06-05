@@ -1,0 +1,43 @@
+name: Harvest
+
+on:
+  push:
+    tags:
+      - v*    
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason'
+        required: false
+        default: 'Manual trigger'
+
+jobs:
+  Harvest:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+    - name: wget
+      shell: bash
+      run: wget -O irdmtools.zip https://github.com/caltechlibrary/irdmtools/releases/download/v0.0.5/irdmtools-0.0.5-linux-amd64.zip
+    - name: unzip
+      shell: bash
+      run: unzip -qq irdmtools.zip -d irdmtools
+    - name: mv
+      shell: bash
+      run: mv irdmtools/bin/doi2rdm .
+    - name: ls
+      shell: bash
+      run: ls
+    - name: chmod
+      shell: bash
+      run: chmod +x doi2rdm
+    - name: Harvest DOIs
+      shell: bash
+      run: python harvest.py
+    - name: Commit CFF
+      uses: EndBug/add-and-commit@v7
+      with:
+        message: 'Update run date'
+        add: 'last_run.txt'
+        branch: 'main'
