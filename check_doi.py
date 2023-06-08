@@ -14,18 +14,18 @@ def check_doi(doi, production=True):
     else:
         url = "https://authors.caltechlibrary.dev/api/records"
 
-    query = f'?q=metadata.identifiers.identifier:"{doi}"'
+    query = f'?q=pids.doi.identifier:"{doi}"'
 
     response = requests.get(url + query)
     if response.status_code != 200:
         raise Exception(response.text)
     else:
         metadata = response.json()
-        if metadata['hits']['total'] > 0:
+        if metadata["hits"]["total"] > 0:
             return True
         else:
             return False
-    
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
