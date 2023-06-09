@@ -26,6 +26,9 @@ jobs:
       - name: Install irdmtools
         shell: bash
         run: curl https://caltechlibrary.github.io/irdmtools/installer.sh | sh
+      - name: Path
+        shell: bash
+        run: export PATH="$HOME/bin:$PATH
       - name: Harvest DOIs
         shell: bash
         env:
