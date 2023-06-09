@@ -39,6 +39,7 @@ if "items" in data["message"]:
                 if DOI not in harvested_dois:
                     print(DOI)
                     try:
+                        print(os.listdir())
                         transformed = subprocess.check_output(["doi2rdm", DOI])
                         data = transformed.decode("utf-8")
                         data = json.loads(data)
