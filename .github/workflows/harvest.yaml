@@ -16,14 +16,14 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Pythondeps
         shell: bash
         run: pip install -r requirements.txt
       - name: wget
         shell: bash
         run: wget -O irdmtools.zip
-            https://github.com/caltechlibrary/irdmtools/releases/download/v0.0.20/irdmtools-0.0.20-linux-amd64.zip
+            https://github.com/caltechlibrary/irdmtools/releases/download/v0.0.20/irdmtools-v0.0.20-linux-amd64.zip
       - name: unzip
         shell: bash
         run: unzip -qq irdmtools.zip -d irdmtools
@@ -38,7 +38,9 @@ jobs:
         run: chmod +x doi2rdm
       - name: Harvest DOIs
         shell: bash
-        run: python harvest.py
+        env:
+            RDMTOK: ${{ secrets.RDMTOK }}
+        run: python harvest.py 
       - name: Commit CFF
         uses: EndBug/add-and-commit@v9
         with:
