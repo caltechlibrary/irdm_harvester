@@ -43,4 +43,4 @@ jobs:
         uses: EndBug/add-and-commit@v9
         with:
           message: 'Update run date'
-          add: ['last_run.txt', 'harvested_dois.txt']
+          add: "['last_run.txt', 'harvested_dois.txt']"
