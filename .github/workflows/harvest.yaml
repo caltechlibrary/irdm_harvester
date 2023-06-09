@@ -17,25 +17,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Pythondeps
+      - name: Python Deps
         shell: bash
         run: pip install -r requirements.txt
-      - name: wget
+      - name: Install irdmtools
         shell: bash
-        run: wget -O irdmtools.zip
-            https://github.com/caltechlibrary/irdmtools/releases/download/v0.0.20/irdmtools-v0.0.20-linux-aarch64.zip
-      - name: unzip
-        shell: bash
-        run: unzip -qq irdmtools.zip -d irdmtools
-      - name: mv
-        shell: bash
-        run: mv irdmtools/bin/doi2rdm .
-      - name: ls
-        shell: bash
-        run: ls
-      - name: chmod
-        shell: bash
-        run: chmod +x doi2rdm
+        run: curl https://caltechlibrary.github.io/irdmtools/installer.sh | sh
       - name: Harvest DOIs
         shell: bash
         env:
