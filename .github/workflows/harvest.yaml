@@ -17,6 +17,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Pythondeps
+        shell: bash
+        run: pip install -r requirements.txt
       - name: wget
         shell: bash
         run: wget -O irdmtools.zip
