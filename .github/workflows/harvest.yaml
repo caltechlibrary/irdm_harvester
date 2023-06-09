@@ -29,12 +29,6 @@ jobs:
       - name: Path
         shell: bash
         run: cp $HOME/bin/doi2rdm $HOME/.local/bin/.
-      - name: Path2
-        shell: bash
-        run: echo $PATH
-      - name: Path3
-        shell: bash
-        run: doi2rdm --version
       - name: Harvest DOIs
         shell: bash
         env:

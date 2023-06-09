@@ -5,6 +5,24 @@ import requests
 from check_doi import check_doi
 from caltechdata_api import caltechdata_write
 
+def cleanup_metadata(metadata):
+    licenses = {}
+    with open('licenses.csv') as infile:
+        reader=csv.DictReader(infile,delimiter=';')
+        for row in reader:
+            licenses[row['props__url']] = row['id']
+    links = set()
+    for f in metadata['metadata']['rights']:
+        links.add(f['link'])
+    rights = []
+    for l in links:
+        if l in licenses:
+            rights.append({"id":licenses[l]})
+        else:
+            rights.append({"link":l,"title":{'en':'Unknown'}})
+    metadata['metadata']['rights'] = rights
+    return metadata
+
 # Get defaults from environment variables if available
 ror = os.getenv("ROR")
 if ror is None:
@@ -39,10 +57,10 @@ if "items" in data["message"]:
                 if DOI not in harvested_dois:
                     print(DOI)
                     try:
-                        print(os.listdir())
                         transformed = subprocess.check_output(["doi2rdm", DOI])
                         data = transformed.decode("utf-8")
                         data = json.loads(data)
+                        data = cleanup_metadata(data)
                         response = caltechdata_write(
                             data,
                             token,
