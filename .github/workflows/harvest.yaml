@@ -23,7 +23,7 @@ jobs:
       - name: wget
         shell: bash
         run: wget -O irdmtools.zip
-            https://github.com/caltechlibrary/irdmtools/releases/download/v0.0.20/irdmtools-v0.0.20-linux-amd64.zip
+            https://github.com/caltechlibrary/irdmtools/releases/download/v0.0.20/irdmtools-v0.0.20-linux-aarch64.zip
       - name: unzip
         shell: bash
         run: unzip -qq irdmtools.zip -d irdmtools
