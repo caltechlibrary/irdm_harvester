@@ -20,6 +20,9 @@ jobs:
       - name: Python Deps
         shell: bash
         run: pip install -r requirements.txt
+      - name: Make downloads folder
+        shell: bash
+        run: mkdir $HOME/Downloads
       - name: Install irdmtools
         shell: bash
         run: curl https://caltechlibrary.github.io/irdmtools/installer.sh | sh
