@@ -1,4 +1,5 @@
 import os, csv, json
+import datetime
 import subprocess
 import requests
 from check_doi import check_doi
@@ -34,13 +35,12 @@ if "items" in data["message"]:
     for result in data["message"]["items"]:
         if result["type"] not in excluded:
             DOI = result["DOI"]
-            print(DOI)
             if not check_doi(DOI, production=False):
                 if DOI not in harvested_dois:
+                    print(DOI)
                     try:
                         transformed = subprocess.check_output(["doi2rdm", DOI])
                         data = transformed.decode("utf-8")
-                        print(data)
                         data = json.loads(data)
                         response = caltechdata_write(
                             data,
@@ -48,13 +48,13 @@ if "items" in data["message"]:
                             production=False,
                             authors=True,
                             community=community,
+                            review_message="Automatically added from CrossRef based on Caltech ROR affiliation",
                         )
                         print(response)
-                        if response.status_code != 200:
-                            print(response.text)
-                            print("Error with caltechdata_write")
-                        else:
-                            with open("harvested_dois.txt", "a") as f:
-                                f.write(DOI + "\n")
+                        with open("harvested_dois.txt", "a") as f:
+                            f.write(DOI + "\n")
                     except subprocess.CalledProcessError:
                         print("Error with doi2rdm")
+    date = datetime.date.today().isoformat()
+    with open("last_run.txt", "w") as outfile:
+        outfile.write(date)
