@@ -29,6 +29,12 @@ jobs:
       - name: Path
         shell: bash
         run: export PATH="$HOME/bin:$PATH"
+      - name: Path2
+        shell: bash
+        run: echo $PATH
+      - name: Path3
+        shell: bash
+        run: doi2rdm --version
       - name: Harvest DOIs
         shell: bash
         env:
