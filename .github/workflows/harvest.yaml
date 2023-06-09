@@ -28,7 +28,7 @@ jobs:
         run: curl https://caltechlibrary.github.io/irdmtools/installer.sh | sh
       - name: Path
         shell: bash
-        run: export PATH="$HOME/bin:$PATH"
+        run: cp $HOME/bin/doi2rdm $HOME/.local/bin/.
       - name: Path2
         shell: bash
         run: echo $PATH
