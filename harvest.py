@@ -42,7 +42,7 @@ with open("harvested_dois.txt") as infile:
 
 crossref_path = f"http://api.crossref.org/works?filter=ror-id:{ror},from-index-date:{last_run}&mailto={email}&rows=1000"
 
-community = "70768bd5-918b-441b-bd45-12a3f296447c"
+community = "9b22c27e-e7f6-4699-adf2-4593dce9cc48"
 
 excluded = ["peer-review", "grant"]
 
