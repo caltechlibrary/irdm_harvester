@@ -16,7 +16,7 @@ def cleanup_metadata(metadata):
     for f in metadata["metadata"]["rights"]:
         link = f["link"]
         if link in licenses:
-            f["id"] = licenses[l]
+            f["id"] = licenses[link]
         else:
             f["title"]["en"] = "Unknown"
         if f["description"]["en"] == "vor":
