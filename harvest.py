@@ -5,23 +5,25 @@ import requests
 from check_doi import check_doi
 from caltechdata_api import caltechdata_write
 
+
 def cleanup_metadata(metadata):
     licenses = {}
-    with open('licenses.csv') as infile:
-        reader=csv.DictReader(infile,delimiter=';')
+    with open("licenses.csv") as infile:
+        reader = csv.DictReader(infile, delimiter=";")
         for row in reader:
-            licenses[row['props__url']] = row['id']
-    links = set()
-    for f in metadata['metadata']['rights']:
-        links.add(f['link'])
+            licenses[row["props__url"]] = row["id"]
     rights = []
-    for l in links:
-        if l in licenses:
-            rights.append({"id":licenses[l]})
+    for f in metadata["metadata"]["rights"]:
+        link = f["link"]
+        if link in licenses:
+            f["id"] = licenses[l]
         else:
-            rights.append({"link":l,"title":{'en':'Unknown'}})
-    metadata['metadata']['rights'] = rights
+            f["title"]["en"] = "Unknown"
+        if f["description"]["en"] == "vor":
+            rights.append(f)
+    metadata["metadata"]["rights"] = rights
     return metadata
+
 
 # Get defaults from environment variables if available
 ror = os.getenv("ROR")
@@ -59,8 +61,11 @@ if "items" in data["message"]:
                     try:
                         transformed = subprocess.check_output(["doi2rdm", DOI])
                         data = transformed.decode("utf-8")
+                        print(data)
                         data = json.loads(data)
                         data = cleanup_metadata(data)
+                        print(data)
+                        exit()
                         response = caltechdata_write(
                             data,
                             token,
