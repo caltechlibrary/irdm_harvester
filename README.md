@@ -48,6 +48,10 @@ For command line use you need the latest version of `irdmtools` installed:
 
 CaltechAUTHORS in InvenioRDM is still in development, and will likely change.
 
+Publishers use a wide variety of urls for licenses. We are currently adding
+variabts to the license.csv file, which is a custom file that connects urls to
+the InvenioRDM license names. It is almost certainly incomplete.
+
 ## Getting help
 
 Open an issue in the issue tab.

@@ -68,7 +68,8 @@ cc-by-2.5;Creative Commons Attribution 2.5 Generic;;;all,data;https://creativeco
 cc-by-3.0;Creative Commons Attribution 3.0 Unported;;;all,data;https://creativecommons.org/licenses/by/3.0/legalcode;spdx;
 cc-by-3.0-at;Creative Commons Attribution 3.0 Austria;;;all,data;https://creativecommons.org/licenses/by/3.0/at/legalcode;spdx;
 cc-by-3.0-us;Creative Commons Attribution 3.0 United States;;;all,data;https://creativecommons.org/licenses/by/3.0/us/legalcode;spdx;
-cc-by-4.0;Creative Commons Attribution 4.0 International;The Creative Commons Attribution license allows re-distribution and re-use of a licensed work on the condition that the creator is appropriately credited.;;recommended,all,data;https://creativecommons.org/licenses/by/4.0/legalcode;spdx;
+cc-by-4.0;Creative Commons Attribution 4.0 International;;;recommended,all,data;https://creativecommons.org/licenses/by/4.0/legalcode;spdx;
+cc-by-4.0;Creative Commons Attribution 4.0 International;;;;http://creativecommons.org/licenses/by/4.0/;;
 cc-by-nc-1.0;Creative Commons Attribution Non Commercial 1.0 Generic;;;all,data;https://creativecommons.org/licenses/by-nc/1.0/legalcode;spdx;
 cc-by-nc-2.0;Creative Commons Attribution Non Commercial 2.0 Generic;;;all,data;https://creativecommons.org/licenses/by-nc/2.0/legalcode;spdx;
 cc-by-nc-2.5;Creative Commons Attribution Non Commercial 2.5 Generic;;;all,data;https://creativecommons.org/licenses/by-nc/2.5/legalcode;spdx;
