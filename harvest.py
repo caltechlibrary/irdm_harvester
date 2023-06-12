@@ -61,11 +61,8 @@ if "items" in data["message"]:
                     try:
                         transformed = subprocess.check_output(["doi2rdm", DOI])
                         data = transformed.decode("utf-8")
-                        print(data)
                         data = json.loads(data)
                         data = cleanup_metadata(data)
-                        print(data)
-                        exit()
                         response = caltechdata_write(
                             data,
                             token,
