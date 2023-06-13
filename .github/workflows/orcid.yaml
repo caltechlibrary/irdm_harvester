@@ -1,0 +1,37 @@
+name: Harvest from ORCID
+
+on:
+  workflow_dispatch:
+    inputs:
+      orcid:
+        description: 'ORCID identifier to harvest from'
+        required: true
+
+jobs:
+  Harvest:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Python Deps
+        shell: bash
+        run: pip install -r requirements.txt
+      - name: Make downloads folder
+        shell: bash
+        run: mkdir $HOME/Downloads
+      - name: Install irdmtools
+        shell: bash
+        run: curl https://caltechlibrary.github.io/irdmtools/installer.sh | sh
+      - name: Path
+        shell: bash
+        run: cp $HOME/bin/doi2rdm $HOME/.local/bin/.
+      - name: Harvest DOIs
+        shell: bash
+        env:
+            RDMTOK: ${{ secrets.RDMTOK }}
+        run: python harvest.py orcid -orcid $GITHUB.EVENT.INPUTS.orcid -actor $GITHUB_ACTOR 
+      - name: Commit CFF
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: 'Update run date'
+          add: "['harvested_dois.txt']"

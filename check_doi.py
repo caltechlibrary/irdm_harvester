@@ -29,7 +29,7 @@ def check_doi(doi, production=True):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="get_metadata queries the caltechDATA (Invenio 3) API\
+        description="check_doi queries the caltechDATA (Invenio 3) API\
     for a given DOI and returns whether it is present"
     )
     parser.add_argument(
