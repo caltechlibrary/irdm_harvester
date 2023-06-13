@@ -112,11 +112,11 @@ if __name__ == "__main__":
         sys.exit(1)
 
     for doi in dois:
-        if not check_doi(DOI, production=False):
-            if DOI not in harvested_dois:
-                print(DOI)
+        if not check_doi(doi, production=False):
+            if doi not in harvested_dois:
+                print(doi)
                 try:
-                    transformed = subprocess.check_output(["doi2rdm", DOI])
+                    transformed = subprocess.check_output(["doi2rdm", doi])
                     data = transformed.decode("utf-8")
                     data = json.loads(data)
                     data = cleanup_metadata(data)
@@ -130,6 +130,6 @@ if __name__ == "__main__":
                     )
                     print(response)
                     with open("harvested_dois.txt", "a") as f:
-                        f.write(DOI + "\n")
+                        f.write(doi + "\n")
                 except subprocess.CalledProcessError:
                     print("Error with doi2rdm")
