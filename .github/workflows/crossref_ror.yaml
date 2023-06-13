@@ -1,4 +1,4 @@
-name: Harvest
+name: Harvest from CrossRef by ROR
 
 on:
   push:
@@ -34,7 +34,7 @@ jobs:
         env:
             RDMTOK: ${{ secrets.RDMTOK }}
         run: python harvest.py 
-      - name: Commit CFF
+      - name: Commit Files
         uses: EndBug/add-and-commit@v9
         with:
           message: 'Update run date'

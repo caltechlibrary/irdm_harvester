@@ -29,7 +29,7 @@ jobs:
         shell: bash
         env:
             RDMTOK: ${{ secrets.RDMTOK }}
-        run: python harvest.py orcid -orcid $GITHUB.EVENT.INPUTS.orcid -actor $GITHUB_ACTOR 
+        run: python harvest.py orcid -orcid ${{github.event.inputs.orcid}} -actor ${{GITHUB_ACTOR}} 
       - name: Commit CFF
         uses: EndBug/add-and-commit@v9
         with:
