@@ -29,7 +29,7 @@ jobs:
         shell: bash
         env:
             RDMTOK: ${{ secrets.RDMTOK }}
-        run: python harvest.py doi -doi ${{github.event.inputs.doi}} -actor ${{github.actor}} 
+        run: python harvest.py doi -doi "${{github.event.inputs.doi}}" -actor ${{github.actor}} 
       - name: Commit File
         uses: EndBug/add-and-commit@v9
         with:
