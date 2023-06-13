@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       doi:
-        description: 'DOI or multipls DOIs (separated by a space) to harvest from'
+        description: 'DOI or multiple DOIs (separated by a space) to harvest from'
         required: true
 
 jobs:
