@@ -106,7 +106,7 @@ if __name__ == "__main__":
             f"Automatically added from ORCID from record {args.orcid} by {args.actor}"
         )
     elif harvest_type == "doi":
-        dois = [args.doi]
+        dois = args.doi.split(' ')
         review_message = f"Automatically added from DOI {args.doi} by {args.actor}"
     else:
         print("Invalid harvest type")
