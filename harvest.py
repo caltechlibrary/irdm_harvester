@@ -107,7 +107,7 @@ if __name__ == "__main__":
         )
     elif harvest_type == "doi":
         dois = args.doi.split(' ')
-        review_message = f"Automatically added from DOI {args.doi} by {args.actor}"
+        review_message = f"Automatically added by {args.actor} as part of import from DOI list: {args.doi}"
     else:
         print("Invalid harvest type")
         sys.exit(1)
