@@ -102,11 +102,11 @@ if __name__ == "__main__":
     elif harvest_type == "orcid":
         dois = get_orcid_works(args.orcid)
         review_message = (
-            f"Automatically added from ORCID from record {args.orcid} by {actor}"
+            f"Automatically added from ORCID from record {args.orcid} by {args.actor}"
         )
     elif harvest_type == "doi":
         dois = [args.doi]
-        review_message = f"Automatically added from DOI {args.doi} by {actor}"
+        review_message = f"Automatically added from DOI {args.doi} by {args.actor}"
     else:
         print("Invalid harvest type")
         sys.exit(1)
