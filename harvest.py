@@ -14,14 +14,15 @@ def cleanup_metadata(metadata):
         for row in reader:
             licenses[row["props__url"]] = row["id"]
     rights = []
-    for f in metadata["metadata"]["rights"]:
-        link = f["link"]
-        if link in licenses:
-            f["id"] = licenses[link]
-        else:
-            f["title"]["en"] = "Unknown"
-        if f["description"]["en"] == "vor":
-            rights.append(f)
+    if 'rights' in 'metadata':
+        for f in metadata["metadata"]["rights"]:
+            link = f["link"]
+            if link in licenses:
+                f["id"] = licenses[link]
+            else:
+                f["title"]["en"] = "Unknown"
+            if f["description"]["en"] == "vor":
+                rights.append(f)
     metadata["metadata"]["rights"] = rights
     return metadata
 
