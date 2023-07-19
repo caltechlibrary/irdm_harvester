@@ -115,7 +115,7 @@ if __name__ == "__main__":
     for doi in dois:
         if not check_doi(doi, production=False):
             if doi not in harvested_dois:
-                print(doi)
+                print(f"Harvesting {doi}")
                 try:
                     transformed = subprocess.check_output(["doi2rdm", doi])
                     data = transformed.decode("utf-8")
@@ -134,3 +134,7 @@ if __name__ == "__main__":
                         f.write(doi + "\n")
                 except subprocess.CalledProcessError:
                     print("Error with doi2rdm")
+            else:
+                print(f"DOI {doi} has already been harvested, skipping")
+        else:
+            print(f"DOI {doi} is already in CaltechAUTHORS, skipping")
