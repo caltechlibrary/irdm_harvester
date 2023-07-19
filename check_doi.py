@@ -7,7 +7,7 @@ import requests
 
 
 def check_doi(doi, production=True):
-    # Returns just DataCite metadata or DataCite metadata with emails
+    # Returns whether or not a DOI has already been added to CaltechAUTHORS
 
     if production == True:
         url = "https://authors.caltech.edu/api/records"
