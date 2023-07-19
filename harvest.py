@@ -3,6 +3,7 @@ import argparse
 import datetime
 import subprocess
 import requests
+from idutils import normalize_doi
 from check_doi import check_doi
 from caltechdata_api import caltechdata_write
 
@@ -113,6 +114,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     for doi in dois:
+        doi = normalize_doi(doi)
         if not check_doi(doi, production=False):
             if doi not in harvested_dois:
                 print(f"Harvesting {doi}")
