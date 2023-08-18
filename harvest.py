@@ -94,7 +94,7 @@ if __name__ == "__main__":
     with open("harvested_dois.txt") as infile:
         harvested_dois = infile.read().splitlines()
 
-    community = "669e5e57-7d9e-4d19-8ab5-9c6158562fb3"
+    community = "aedd135f-227e-4fdf-9476-5b3fd011bac6"
 
     if harvest_type == "crossref":
         dois = get_crossref_ror()
