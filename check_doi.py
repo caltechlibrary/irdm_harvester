@@ -10,7 +10,7 @@ def check_doi(doi, production=True):
     # Returns whether or not a DOI has already been added to CaltechAUTHORS
 
     if production == True:
-        url = "https://authors.caltech.edu/api/records"
+        url = "https://authors.library.caltech.edu/api/records"
     else:
         url = "https://authors.caltechlibrary.dev/api/records"
 
