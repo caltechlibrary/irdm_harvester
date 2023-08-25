@@ -115,7 +115,7 @@ if __name__ == "__main__":
 
     for doi in dois:
         doi = normalize_doi(doi)
-        if not check_doi(doi, production=False):
+        if not check_doi(doi, production=True):
             if doi not in harvested_dois:
                 print(f"Harvesting {doi}")
                 try:
@@ -126,7 +126,7 @@ if __name__ == "__main__":
                     response = caltechdata_write(
                         data,
                         token,
-                        production=False,
+                        production=True,
                         authors=True,
                         community=community,
                         review_message=review_message,
