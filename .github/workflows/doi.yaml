@@ -11,6 +11,7 @@ jobs:
   Harvest:
     runs-on: ubuntu-22.04
     steps:
+      - run: echo "$RDMTOK"
       - name: Checkout
         uses: actions/checkout@v3
       - name: Python Deps
