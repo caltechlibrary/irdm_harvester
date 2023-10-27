@@ -33,5 +33,5 @@ jobs:
       - name: Commit File
         uses: EndBug/add-and-commit@v9
         with:
-          message: 'Update run date'
+          message: 'Update harvested_dois.txt'
           add: "['harvested_dois.txt']"
