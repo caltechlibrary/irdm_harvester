@@ -27,6 +27,11 @@ release](https://img.shields.io/github/v/release/caltechlibrary/irdm_harvester.s
 Currently harvesting:
 
     - CrossRef by ROR
+    - ORCID
+    - CrossRef DOIs
+
+The harvests are typically run through [GitHub actions](https://github.com/caltechlibrary/irdm_harvester/actions) 
+but could also be run on the command line.
 
 ## Installation
 
@@ -46,10 +51,12 @@ For command line use you need the latest version of `irdmtools` installed:
 
 ## Known issues and limitations
 
-CaltechAUTHORS in InvenioRDM is still in development, and will likely change.
+While this approach should work for any InvenioRDM repository, it has only been tested on 
+CaltechAUTHORS. If you're interested in using this with a different repository reach out as we
+would be happy to make it a bit more flexible.
 
 Publishers use a wide variety of urls for licenses. We are currently adding
-variabts to the license.csv file, which is a custom file that connects urls to
+variants to the license.csv file, which is a custom file that connects urls to
 the InvenioRDM license names. It is almost certainly incomplete.
 
 ## Getting help
@@ -58,12 +65,11 @@ Open an issue in the issue tab.
 
 ## Contributing
 
-Pull requess are appreciated
+Pull requests are appreciated.
 
 ## License
 
 Software produced by the Caltech Library is Copyright © 2022 California Institute of Technology.  This software is freely distributed under a BSD-style license.  Please see the [LICENSE](LICENSE) file for more information.
-
 
 ## Authors and history
 
