@@ -1,8 +1,7 @@
 # InvenioRDM Harvester
 
-This repository is an example of harvesting openly available content for and
-InvenioRDM repository. It currently looks at CrossRef for articles published by
-Caltech authors.
+This is a harvester that can automatically collect and submit works to an
+InvenioRDM repository. It currently works with the CaltechAUTHORS repository and looks at CrossRef and ORCID.
 
 [![License](https://img.shields.io/badge/License-BSD--like-lightgrey)](https://choosealicense.com/licenses/bsd-3-clause)
 [![Latest
@@ -30,23 +29,40 @@ Currently harvesting:
     - ORCID
     - CrossRef DOIs
 
+## Usage
+
 The harvests are typically run through [GitHub actions](https://github.com/caltechlibrary/irdm_harvester/actions) 
 but could also be run on the command line.
 
-## Installation
-
 You need to have a CaltechAUTHORS token available in the environment variable 
-`RDMTOK`
-
-Run as a GitHub action or on the comand line
+`RDMTOK`. For a CrossRef ROR harvest type
 
 ```bash
-python harvest.py
+python harvest.py crossref
 ```
+
+You can harvest a specific DOI with
+
+```bash
+python harvest.py -doi 10.7717/peerj-cs.1023
+```
+
+For an ORCID harvest type:
+
+```bash
+python harvest.py orcid -orcid 0000-0001-9266-5146
+```
+
+For all harvests there is an `-actor` flag, which gets included in the message when the record is added to the queue.
+
+## Installation
 
 For command line use you need the latest version of `irdmtools` installed:
 
 `curl https://caltechlibrary.github.io/irdmtools/installer.sh | sh`
+
+Then install the python requirements with
+
 `pip install -r requirements.txt`
 
 ## Known issues and limitations
