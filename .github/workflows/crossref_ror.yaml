@@ -1,9 +1,6 @@
 name: Harvest from CrossRef by ROR
 
 on:
-  push:
-    tags:
-      - v*    
   workflow_dispatch:
     inputs:
       reason:
