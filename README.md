@@ -6,6 +6,7 @@ InvenioRDM repository. It currently works with the CaltechAUTHORS repository and
 [![License](https://img.shields.io/badge/License-BSD--like-lightgrey)](https://choosealicense.com/licenses/bsd-3-clause)
 [![Latest
 release](https://img.shields.io/github/v/release/caltechlibrary/irdm_harvester.svg?color=b44e88)](https://github.com/irdm_harvester/template/releases)
+[![DOI](https://data.caltech.edu/badge/DOI/10.22002/c14ab-m2d78.svg)](https://doi.org/10.22002/c14ab-m2d78)
 
 
 ## Table of contents
