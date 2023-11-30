@@ -1,6 +1,8 @@
 name: Harvest from CrossRef by ROR
 
 on:
+  schedule:
+    - cron: '0 15 * * 1-5'
   workflow_dispatch:
     inputs:
       reason:
