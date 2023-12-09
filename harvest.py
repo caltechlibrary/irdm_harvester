@@ -6,6 +6,7 @@ import requests
 from idutils import normalize_doi
 from check_doi import check_doi
 from caltechdata_api import caltechdata_write
+from wos import get_wos_dois
 
 
 def cleanup_metadata(metadata):
@@ -15,7 +16,7 @@ def cleanup_metadata(metadata):
         for row in reader:
             licenses[row["props__url"]] = row["id"]
     rights = []
-    if 'rights' in 'metadata':
+    if "rights" in "metadata":
         for f in metadata["metadata"]["rights"]:
             link = f["link"]
             if link in licenses:
@@ -84,6 +85,7 @@ if __name__ == "__main__":
     parser.add_argument("-orcid", help="ORCID ID to harvest from")
     parser.add_argument("-doi", help="DOI to harvest")
     parser.add_argument("-actor", help="Name of actor to use for review message")
+    parser.add_argument("-report", help="Generate a report only", action="store_true")
     args = parser.parse_args()
 
     harvest_type = args.harvest_type
@@ -107,8 +109,56 @@ if __name__ == "__main__":
             f"Automatically added from ORCID from record {args.orcid} by {args.actor}"
         )
     elif harvest_type == "doi":
-        dois = args.doi.split(' ')
+        dois = args.doi.split(" ")
         review_message = f"Automatically added by {args.actor} as part of import from DOI list: {args.doi}"
+    elif harvest_type == "wos":
+        # dois = get_wos_dois("1Y")
+        # outfile = open("wos_dois.csv", "w")
+        # writer = csv.writer(outfile)
+        # for doi in dois:
+        #    writer.writerow([doi])
+        # outfile.close()
+        token = os.environ["RDMTOK"]
+        infile = open("wos_dois.csv")
+        reader = csv.reader(infile)
+        dois = []
+        for row in reader:
+            dois.append(row[0])
+        new_dois = []
+        arxiv_dois = []
+        existing_dois = []
+        count = 1
+        for doi in dois:
+            if not check_doi(doi, production=True, token=token):
+                if "arXiv" in doi:
+                    arxiv_dois.append(doi)
+                else:
+                    new_dois.append(doi)
+            else:
+                existing_dois.append(doi)
+            print(count)
+            count += 1
+        print(check_doi("10.1038/s41590-023-01716-6", production=True))
+        if args.report:
+            outfile = open("wos_report.csv", "w")
+            writer = csv.writer(outfile)
+            print(f"New: {len(new_dois)}")
+            for doi in new_dois:
+                writer.writerow([doi])
+            outfile.close()
+            outfile = open("wos_report_existing.csv", "w")
+            writer = csv.writer(outfile)
+            print(f"Existing: {len(existing_dois)}")
+            for doi in existing_dois:
+                writer.writerow([doi])
+            outfile.close()
+            outfile = open("wos_report_arxiv.csv", "w")
+            writer = csv.writer(outfile)
+            print(f"arXiv: {len(arxiv_dois)}")
+            for doi in arxiv_dois:
+                writer.writerow([doi])
+            outfile.close()
+        exit()
     else:
         print("Invalid harvest type")
         sys.exit(1)

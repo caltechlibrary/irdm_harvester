@@ -6,7 +6,7 @@ import os
 import requests
 
 
-def check_doi(doi, production=True):
+def check_doi(doi, production=True, token=None):
     # Returns whether or not a DOI has already been added to CaltechAUTHORS
 
     if production == True:
@@ -14,9 +14,20 @@ def check_doi(doi, production=True):
     else:
         url = "https://authors.caltechlibrary.dev/api/records"
 
+    if token:
+        headers = {
+            "Authorization": "Bearer %s" % token,
+            "Content-type": "application/json",
+        }
+    else:
+        headers = {
+            "Content-type": "application/json",
+        }
+
     query = f'?q=pids.doi.identifier:"{doi}"'
 
-    response = requests.get(url + query)
+    print(headers)
+    response = requests.get(url + query, headers=headers)
     if response.status_code != 200:
         raise Exception(response.text)
     else:
