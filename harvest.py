@@ -9,14 +9,15 @@ from caltechdata_api import caltechdata_write
 from wos import get_wos_dois
 
 
-def match_orcid(person, orcid):
+def match_orcid(creator, orcid):
+    person = creator["person_or_org"]
     url = f"https://authors.library.caltech.edu/api/names?q=identifiers.identifier:{orcid}"
     response = requests.get(url)
     if response.status_code == 200:
         results = response.json()["hits"]["hits"]
         if len(results) == 1:
             result = results[0]
-            person["affiliations"] = result["affiliations"]
+            creator["affiliations"] = result["affiliations"]
             person["identifiers"] = result["identifiers"]
 
 
@@ -24,13 +25,11 @@ def cleanup_metadata(metadata):
     # Match creators by ORCID
     for creator in metadata["metadata"]["creators"]:
         person = creator["person_or_org"]
-        print(person)
         if "identifiers" in person:
             for identifier in person["identifiers"]:
                 if identifier["scheme"] == "orcid":
                     orcid = identifier["identifier"]
-                    print(orcid)
-                    match_orcid(person, orcid)
+                    match_orcid(creator, orcid)
     # Clean up licenses
     licenses = {}
     with open("licenses.csv") as infile:
