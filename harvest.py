@@ -194,7 +194,7 @@ if __name__ == "__main__":
         while dois:
             doi = dois.pop()
             try:
-                if not check_doi(doi, production=True):
+                if not check_doi(doi, production=True, token=token):
                     if "arXiv" in doi:
                         arxiv_dois.append(doi)
                     else:
@@ -218,7 +218,7 @@ if __name__ == "__main__":
 
     for doi in dois:
         doi = normalize_doi(doi)
-        if not check_doi(doi, production=True):
+        if not check_doi(doi, production=True, token=token):
             if doi not in harvested_dois:
                 print(f"Harvesting {doi}")
                 try:
