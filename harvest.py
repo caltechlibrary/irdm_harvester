@@ -79,7 +79,7 @@ def get_crossref_ror():
 
     crossref_path = f"http://api.crossref.org/works?filter=ror-id:{ror},from-index-date:{last_run}&mailto={email}&rows=1000"
 
-    excluded = ["peer-review", "grant"]
+    excluded = ["peer-review", "grant", "dataset"]
 
     # Get the list of DOIs from Crossref
     response = requests.get(crossref_path)
