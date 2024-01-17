@@ -16,7 +16,6 @@ jobs:
     env:
       DOI: ${{ github.event.inputs.doi }}
     steps: 
-      - name: Split input
       - name: Process DOIs
         shell: bash
         run: python split_doi.py
