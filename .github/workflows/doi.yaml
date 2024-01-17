@@ -23,7 +23,7 @@ jobs:
     strategy:
       max-parallel: 2
       matrix:
-        version: ${{ fromJSON(needs.prepare-dois.outputs.dois) }}
+        doi: ${{ fromJSON(needs.prepare-dois.outputs.dois) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -43,7 +43,7 @@ jobs:
         shell: bash
         env:
             RDMTOK: ${{ secrets.RDMTOK }}
-        run: python harvest.py doi -doi "${{github.event.inputs.doi}}" -actor ${{github.actor}} 
+        run: python harvest.py doi -doi "${{martix.doi}}" -actor ${{github.actor}} 
       - name: Commit File
         uses: EndBug/add-and-commit@v9
         with:
