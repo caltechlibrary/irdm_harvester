@@ -25,7 +25,6 @@ jobs:
   harvest:
     runs-on: ubuntu-latest
     needs: [prepare-dois]
-    id: harvest
     strategy:
       fail-fast: false
       matrix:
