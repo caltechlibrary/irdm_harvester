@@ -219,7 +219,6 @@ if __name__ == "__main__":
         doi = normalize_doi(doi)
         if not check_doi(doi, production=True, token=token):
             if doi not in harvested_dois:
-                print(f"Harvesting {doi}")
                 try:
                     transformed = subprocess.check_output(["doi2rdm", doi])
                     data = transformed.decode("utf-8")
@@ -233,12 +232,12 @@ if __name__ == "__main__":
                         community=community,
                         review_message=review_message,
                     )
-                    print(response)
-                    with open("harvested_dois.txt", "a") as f:
-                        f.write(doi + "\n")
+                    print("doi=",doi)
+                    #with open("harvested_dois.txt", "a") as f:
+                    #    f.write(doi + "\n")
                 except subprocess.CalledProcessError:
-                    print("Error with doi2rdm")
+                    print("error=Error with doi2rdm")
             else:
-                print(f"DOI {doi} has already been harvested, skipping")
+                print(f"error=DOI {doi} has already been harvested, skipping")
         else:
-            print(f"DOI {doi} is already in CaltechAUTHORS, skipping")
+            print(f"error=DOI {doi} is already in CaltechAUTHORS, skipping")

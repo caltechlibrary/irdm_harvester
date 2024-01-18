@@ -22,14 +22,16 @@ jobs:
         shell: bash
         run: python split_doi.py >> $GITHUB_OUTPUT
         id: step1
-        #run: echo "matrix=$DOI" >> $GITHUB_OUTPUT
   Harvest:
     runs-on: ubuntu-latest
     needs: [prepare-dois]
+    id: harvest
     strategy:
       fail-fast: false
       matrix:
         doi: ${{ fromJSON(needs.prepare-dois.outputs.dois) }}
+    outputs:
+      dois: ${{ steps.step1.outputs.matrix }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -49,7 +51,30 @@ jobs:
         shell: bash
         env:
             RDMTOK: ${{ secrets.RDMTOK }}
-        run: python harvest.py doi -doi "${{matrix.doi}}" -actor ${{github.actor}} 
+        id: harvest
+        run: python harvest.py doi -doi "${{matrix.doi}}" -actor ${{github.actor}} >> $GITHUB_OUTPUT
+    - uses: cloudposse/github-action-matrix-outputs-write@main
+      id: out
+      with:
+        matrix-step-name: ${{ github.job }}
+        matrix-key: ${{ matrix.doi }}
+        outputs: |-
+            doi: ${{ steps.harvest.outputs.doi }}
+            error: ${{steps.harvest.outputs.error }}
+  report-status:
+    name: Report Status
+    runs-on: ubuntu-latest
+    needs: [harvest]
+    outputs:
+      result: "${{ steps.read.outputs.result }}"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: read
+        uses: cloudposse/github-action-matrix-outputs-read@main
+        id: read
+        with:
+          matrix-step-name: harvest
       - name: Commit File
         uses: EndBug/add-and-commit@v9
         with:
