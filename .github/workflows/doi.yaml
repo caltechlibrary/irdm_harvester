@@ -53,7 +53,7 @@ jobs:
         id: harvest
         run: python harvest.py doi -doi "${{matrix.doi}}" -actor ${{github.actor}} >> $GITHUB_OUTPUT
       - name: Early exit
-        if: contains(${{steps.harvest.outputs.error}}, 'error')
+        if: contains(${{steps.harvest.outputs.error}}, 'skipping')
         run:
          echo ${{steps.harvest.outputs.error}}
         #run: |
