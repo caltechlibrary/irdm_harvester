@@ -54,7 +54,7 @@ jobs:
         run: python harvest.py doi -doi "${{matrix.doi}}" -actor ${{github.actor}} >> $GITHUB_OUTPUT
       - name: Determine whether harvest was skipped
         if: contains(steps.harvest.outputs.error, 'skipping')
-        run:
+        run: |
           echo ${{steps.harvest.outputs.error}}
           gh run cancel ${{ github.run_id }}
           gh run watch ${{ github.run_id }}
