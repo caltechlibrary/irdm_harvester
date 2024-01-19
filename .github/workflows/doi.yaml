@@ -54,9 +54,11 @@ jobs:
         run: python harvest.py doi -doi "${{matrix.doi}}" -actor ${{github.actor}} >> $GITHUB_OUTPUT
       - name: Early exit
         if: contains(${{steps.harvest.outputs.error}}, 'error')
-        run: |
-         gh run cancel ${{ github.run_id }}
-         gh run watch ${{ github.run_id }}
+        run:
+         echo ${{steps.harvest.outputs.error}}
+        #run: |
+        # gh run cancel ${{ github.run_id }}
+        # gh run watch ${{ github.run_id }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: cloudposse/github-action-matrix-outputs-write@main
