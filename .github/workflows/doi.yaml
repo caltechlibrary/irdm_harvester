@@ -92,7 +92,7 @@ jobs:
           false
       - name: write DOI
         run: |
-          python write_dois.py "${{steps.read.outputs.result}}"
+          python save_dois.py "${{steps.read.outputs.result}}"
       - name: Commit File
         uses: EndBug/add-and-commit@v9
         with:
