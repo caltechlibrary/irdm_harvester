@@ -212,8 +212,7 @@ if __name__ == "__main__":
             write_outputs(dois, new_dois, existing_dois, arxiv_dois)
         exit()
     else:
-        print("Invalid harvest type")
-        sys.exit(1)
+        print("error: system error invalid harvest type")
 
     for doi in dois:
         doi = normalize_doi(doi)
@@ -235,8 +234,8 @@ if __name__ == "__main__":
                     print("doi=",doi)
                     #with open("harvested_dois.txt", "a") as f:
                     #    f.write(doi + "\n")
-                except subprocess.CalledProcessError:
-                    print("error=Error with doi2rdm")
+                except:
+                    print("error= system error with doi2rdm")
             else:
                 print(f"error=DOI {doi} has already been harvested, skipping")
         else:
