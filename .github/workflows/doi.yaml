@@ -52,11 +52,18 @@ jobs:
             RDMTOK: ${{ secrets.RDMTOK }}
         id: harvest
         run: python harvest.py doi -doi "${{matrix.doi}}" -actor ${{github.actor}} >> $GITHUB_OUTPUT
-      - name: Determine whether harvest was skipped
+      - name: System error on DOI
+        if: contains(steps.harvest.outputs.error, 'system')
+        run: |
+          echo ${{steps.harvest.outputs.error}}
+          false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: System intentionally skipped DOI
         if: contains(steps.harvest.outputs.error, 'skipping')
         run: |
           echo ${{steps.harvest.outputs.error}}
-          gh run cancel ${{ github.run_id }}
+          false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: cloudposse/github-action-matrix-outputs-write@main
@@ -81,8 +88,13 @@ jobs:
         id: read
         with:
           matrix-step-name: harvest
-      - name: Commit File
-        uses: EndBug/add-and-commit@v9
-        with:
-          message: 'Update harvested_dois.txt'
-          add: "['harvested_dois.txt']"
+      - name: write DOI
+        run: |
+          echo ${{steps.read.outputs.doi}}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #- name: Commit File
+    #    uses: EndBug/add-and-commit@v9
+    #    with:
+    #      message: 'Update harvested_dois.txt'
+    #      add: "['harvested_dois.txt']"
