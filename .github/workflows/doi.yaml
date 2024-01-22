@@ -92,11 +92,9 @@ jobs:
           false
       - name: write DOI
         run: |
-          echo ${{steps.read.outputs.result}}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #- name: Commit File
-    #    uses: EndBug/add-and-commit@v9
-    #    with:
-    #      message: 'Update harvested_dois.txt'
-    #      add: "['harvested_dois.txt']"
+          python write_dois.py "${{steps.read.outputs.result}}"
+      - name: Commit File
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: 'Update harvested_dois.txt'
+          add: "['harvested_dois.txt']"
