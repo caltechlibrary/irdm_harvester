@@ -93,22 +93,22 @@ jobs:
         with:
           message: 'Update harvested_dois.txt'
           add: "['harvested_dois.txt']"
-      report-status:
-  name: Report Status
-    runs-on: ubuntu-latest
-    needs: [write-output]
-    outputs:
-      result: "${{ steps.read.outputs.result }}"
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: read
-        uses: cloudposse/github-action-matrix-outputs-read@main
-        id: read
-        with:
-          matrix-step-name: harvest
-      - name: System error on DOI
-        if: contains(steps.read.outputs.result.error, 'system')
-        run: |
-          echo ${{steps.read.outputs.result.error}}
-          false
+  report-status:
+    name: Report Status
+      runs-on: ubuntu-latest
+      needs: [write-output]
+      outputs:
+        result: "${{ steps.read.outputs.result }}"
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v3
+        - name: read
+          uses: cloudposse/github-action-matrix-outputs-read@main
+          id: read
+          with:
+            matrix-step-name: harvest
+        - name: System error on DOI
+          if: contains(steps.read.outputs.result.error, 'system')
+          run: |
+            echo ${{steps.read.outputs.result.error}}
+            false
