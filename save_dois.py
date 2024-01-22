@@ -1,5 +1,6 @@
 import sys, json
 
+print(sys.argv[1])
 result = json.loads(sys.argv[1])
 
 dois = result['doi']
