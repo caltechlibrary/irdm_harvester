@@ -53,6 +53,14 @@ jobs:
             RDMTOK: ${{ secrets.RDMTOK }}
         id: harvest
         run: python harvest.py doi -doi "${{matrix.doi}}" -actor ${{github.actor}} >> $GITHUB_OUTPUT
+      - uses: cloudposse/github-action-matrix-outputs-write@main
+        id: out
+        with:
+          matrix-step-name: ${{ github.job }}
+          matrix-key: ${{ matrix.doi }}
+          outputs: |-
+            doi: ${{ steps.harvest.outputs.doi }}
+            error: ${{steps.harvest.outputs.error }}
       - name: System error on DOI
         if: contains(steps.harvest.outputs.error, 'system')
         run: |
@@ -63,18 +71,32 @@ jobs:
         run: |
           echo ${{steps.harvest.outputs.error}}
           false
-      - uses: cloudposse/github-action-matrix-outputs-write@main
-        id: out
-        with:
-          matrix-step-name: ${{ github.job }}
-          matrix-key: ${{ matrix.doi }}
-          outputs: |-
-            doi: ${{ steps.harvest.outputs.doi }}
-            error: ${{steps.harvest.outputs.error }}
-  report-status:
-    name: Report Status
+  write-output:
+    name: Write Output
     runs-on: ubuntu-latest
     needs: [harvest]
+    outputs:
+      result: "${{ steps.read.outputs.result }}"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: read
+        uses: cloudposse/github-action-matrix-outputs-read@main
+        id: read
+        with:
+          matrix-step-name: harvest
+      - name: write DOI
+        run: |
+          python save_dois.py '${{steps.read.outputs.result}}'
+      - name: Commit File
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: 'Update harvested_dois.txt'
+          add: "['harvested_dois.txt']"
+      report-status:
+  name: Report Status
+    runs-on: ubuntu-latest
+    needs: [write-output]
     outputs:
       result: "${{ steps.read.outputs.result }}"
     steps:
@@ -90,11 +112,3 @@ jobs:
         run: |
           echo ${{steps.read.outputs.result.error}}
           false
-      - name: write DOI
-        run: |
-          python save_dois.py '${{steps.read.outputs.result}}'
-      - name: Commit File
-        uses: EndBug/add-and-commit@v9
-        with:
-          message: 'Update harvested_dois.txt'
-          add: "['harvested_dois.txt']"
