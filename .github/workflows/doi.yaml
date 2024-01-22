@@ -54,18 +54,16 @@ jobs:
         run: python harvest.py doi -doi "${{matrix.doi}}" -actor ${{github.actor}} >> $GITHUB_OUTPUT
       - name: System error on DOI
         if: contains(steps.harvest.outputs.error, 'system')
+        continue-on-error: true
         run: |
           echo ${{steps.harvest.outputs.error}}
           false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: System intentionally skipped DOI
         if: contains(steps.harvest.outputs.error, 'skipping')
+        continue-on-error: true
         run: |
           echo ${{steps.harvest.outputs.error}}
           false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: cloudposse/github-action-matrix-outputs-write@main
         id: out
         with:
@@ -88,6 +86,11 @@ jobs:
         id: read
         with:
           matrix-step-name: harvest
+     - name: System error on DOI
+        if: contains(steps.harvest.outputs.error, 'system')
+        run: |
+          echo ${{steps.harvest.outputs.error}}
+          false
       - name: write DOI
         run: |
           echo ${{steps.read.outputs.doi}}
