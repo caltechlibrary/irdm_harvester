@@ -25,6 +25,7 @@ jobs:
   harvest:
     runs-on: ubuntu-latest
     needs: [prepare-dois]
+    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
@@ -54,13 +55,11 @@ jobs:
         run: python harvest.py doi -doi "${{matrix.doi}}" -actor ${{github.actor}} >> $GITHUB_OUTPUT
       - name: System error on DOI
         if: contains(steps.harvest.outputs.error, 'system')
-        continue-on-error: true
         run: |
           echo ${{steps.harvest.outputs.error}}
           false
       - name: System intentionally skipped DOI
         if: contains(steps.harvest.outputs.error, 'skipping')
-        continue-on-error: true
         run: |
           echo ${{steps.harvest.outputs.error}}
           false
@@ -87,13 +86,13 @@ jobs:
         with:
           matrix-step-name: harvest
       - name: System error on DOI
-        if: contains(steps.harvest.outputs.error, 'system')
+        if: contains(steps.read.outputs.result.error, 'system')
         run: |
-          echo ${{steps.harvest.outputs.error}}
+          echo ${{steps.harvest.outputs.result.error}}
           false
       - name: write DOI
         run: |
-          echo ${{steps.read.outputs.doi}}
+          echo ${{steps.read.outputs.result.doi}}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     #- name: Commit File
