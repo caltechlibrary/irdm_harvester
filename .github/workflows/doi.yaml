@@ -86,7 +86,7 @@ jobs:
         id: read
         with:
           matrix-step-name: harvest
-     - name: System error on DOI
+      - name: System error on DOI
         if: contains(steps.harvest.outputs.error, 'system')
         run: |
           echo ${{steps.harvest.outputs.error}}
