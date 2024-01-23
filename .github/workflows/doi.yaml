@@ -108,7 +108,5 @@ jobs:
         with:
           matrix-step-name: harvest
       - name: System error on DOI
-        if: contains(steps.read.outputs.result.error, 'system')
         run: |
-          echo ${{steps.read.outputs.result.error}}
-          false
+          python check_status.py '${{steps.read.outputs.result}}'
