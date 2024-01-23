@@ -217,6 +217,7 @@ if __name__ == "__main__":
     for doi in dois:
         doi = normalize_doi(doi)
         if not check_doi(doi, production=True, token=token):
+            print(harvested_dois)
             if doi not in harvested_dois:
                 try:
                     transformed = subprocess.check_output(["doi2rdm", doi])
