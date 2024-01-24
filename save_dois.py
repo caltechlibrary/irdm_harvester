@@ -4,11 +4,7 @@ result = json.loads(sys.argv[1])
 
 dois = result['doi']
 
-print(dois)
-
 for doi in dois.keys():
-    print(doi)
-    print(dois[doi])
-    if dois[doi] != 'null':
+    if dois[doi] != None:
         with open("harvested_dois.txt", "a") as f:
             f.write(doi + "\n")
