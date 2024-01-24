@@ -7,6 +7,7 @@ errors = result['error']
 
 for error in errors.keys():
     e = errors[error]
-    if 'system' in errors[error]:
-        print(e)
-        exit(1)
+    if e:
+        if 'system' in e:
+            print(e)
+            exit(1)
