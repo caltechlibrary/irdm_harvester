@@ -212,14 +212,12 @@ if __name__ == "__main__":
             write_outputs(dois, new_dois, existing_dois, arxiv_dois)
         exit()
     else:
-        print("Invalid harvest type")
-        sys.exit(1)
+        print("error: system error invalid harvest type")
 
     for doi in dois:
         doi = normalize_doi(doi)
         if not check_doi(doi, production=True, token=token):
             if doi not in harvested_dois:
-                print(f"Harvesting {doi}")
                 try:
                     transformed = subprocess.check_output(["doi2rdm", doi])
                     data = transformed.decode("utf-8")
@@ -233,12 +231,12 @@ if __name__ == "__main__":
                         community=community,
                         review_message=review_message,
                     )
-                    print(response)
-                    with open("harvested_dois.txt", "a") as f:
-                        f.write(doi + "\n")
-                except subprocess.CalledProcessError:
-                    print("Error with doi2rdm")
+                    print("doi=",doi)
+                    #with open("harvested_dois.txt", "a") as f:
+                    #    f.write(doi + "\n")
+                except:
+                    print("error= system error with doi2rdm")
             else:
-                print(f"DOI {doi} has already been harvested, skipping")
+                print(f"error=DOI {doi} has already been harvested, skipping")
         else:
-            print(f"DOI {doi} is already in CaltechAUTHORS, skipping")
+            print(f"error=DOI {doi} is already in CaltechAUTHORS, skipping")
