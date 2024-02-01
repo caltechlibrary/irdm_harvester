@@ -12,10 +12,10 @@ on:
 
 jobs:
   Harvest:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Python Deps
         shell: bash
         run: pip install -r requirements.txt
@@ -30,9 +30,13 @@ jobs:
         run: cp $HOME/bin/doi2rdm $HOME/.local/bin/.
       - name: Harvest DOIs
         shell: bash
+        id: harvest
         env:
             RDMTOK: ${{ secrets.RDMTOK }}
         run: python harvest.py crossref
+      - name: write DOI
+        run: |
+          python save_dois.py '${{steps.harvest.outputs}}'
       - name: Commit Files
         uses: EndBug/add-and-commit@v9
         with:
