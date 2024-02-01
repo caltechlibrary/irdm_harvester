@@ -176,8 +176,10 @@ if __name__ == "__main__":
     if harvest_type == "crossref":
         dois = get_crossref_ror()
         review_message = (
-            "Automatically added from Crossref based on Caltech ROR affiliation"
+                "Added by Tom during testing, should be a valid article from WOS harvest"
+                #"Automatically added from Crossref based on Caltech ROR affiliation"
         )
+        dois = ['10.1051/0004-6361/202346526','10.1016/j.palaeo.2023.111756']
     elif harvest_type == "orcid":
         dois = get_orcid_works(args.orcid)
         review_message = (

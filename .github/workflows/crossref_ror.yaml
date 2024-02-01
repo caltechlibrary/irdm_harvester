@@ -36,7 +36,7 @@ jobs:
         run: python harvest.py crossref
       - name: write DOI
         run: |
-          python save_dois.py '${{steps.harvest.outputs}}'
+          python save_dois.py '${{steps.harvest.outputs.doi}}'
       - name: Commit Files
         uses: EndBug/add-and-commit@v9
         with:
