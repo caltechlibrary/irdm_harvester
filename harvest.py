@@ -182,7 +182,7 @@ if __name__ == "__main__":
         if args.print:
             ostring = 'dois: '
             for doi in dois:
-                ostrong += f' {doi}'
+                ostring += f' {doi}'
             print(ostring)
             dois = []
     elif harvest_type == "orcid":
