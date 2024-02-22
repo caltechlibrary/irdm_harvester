@@ -37,7 +37,8 @@ def cleanup_metadata(metadata):
         for row in reader:
             licenses[row["props__url"]] = row["id"]
     rights = []
-    if "rights" in "metadata":
+    files = None
+    if "rights" in metadata['metadata']:
         for f in metadata["metadata"]["rights"]:
             link = f["link"]
             if link in licenses:
@@ -46,8 +47,25 @@ def cleanup_metadata(metadata):
                 f["title"]["en"] = "Unknown"
             if f["description"]["en"] == "vor":
                 rights.append(f)
+                if f["id"] == 'cc-by-4.0':
+                    doi = metadata["pids"]["doi"]["identifier"]
+                    response = requests.get('https://api.crossref.org/works/' + doi)
+                    if response.status_code == 200:
+                        data = response.json()
+                        try:
+                            links = data["message"]["link"]
+                            for link in links:
+                                if link["content-type"] == "application/pdf":
+                                    link = link["URL"]
+                                    requests.get(link)
+                                    fname = f"{doi.replace('/','_')}.pdf"
+                                    with open(fname, "wb") as f:
+                                        f.write(response.content)
+                                    files = fname
+                        except:
+                            pass
     metadata["metadata"]["rights"] = rights
-    return metadata
+    return metadata, files
 
 
 def get_orcid_works(orcid):
@@ -235,7 +253,7 @@ if __name__ == "__main__":
                     transformed = subprocess.check_output(["doi2rdm", doi])
                     data = transformed.decode("utf-8")
                     data = json.loads(data)
-                    data = cleanup_metadata(data)
+                    data,files = cleanup_metadata(data)
                     response = caltechdata_write(
                         data,
                         token,
@@ -243,12 +261,13 @@ if __name__ == "__main__":
                         authors=True,
                         community=community,
                         review_message=review_message,
+                        files=files
                     )
                     print("doi=",doi)
                     #with open("harvested_dois.txt", "a") as f:
                     #    f.write(doi + "\n")
-                except:
-                    print("error= system error with doi2rdm")
+                except Exception as e:
+                    print(f"error= system error with doi2rdm {e}")
             else:
                 print(f"error=DOI {doi} has already been harvested, skipping")
         else:

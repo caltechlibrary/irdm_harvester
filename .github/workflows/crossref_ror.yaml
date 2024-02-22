@@ -25,6 +25,11 @@ jobs:
         shell: bash
         id: harvest
         run: python harvest.py crossref -print >> $GITHUB_OUTPUT
+      - name: Commit Files
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: 'Update run date'
+          add: "['last_run.txt']"
   prepare-dois:
     name: Prepare Matrix Output of DOIs
     needs: [get-crossref]
