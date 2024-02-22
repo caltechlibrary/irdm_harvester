@@ -180,7 +180,7 @@ if __name__ == "__main__":
                 "Automatically added from Crossref based on Caltech ROR affiliation"
         )
         if args.print:
-            ostring = 'dois: '
+            ostring = 'dois='
             for doi in dois:
                 ostring += f' {doi}'
             print(ostring)
