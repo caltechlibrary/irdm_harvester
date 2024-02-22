@@ -161,6 +161,7 @@ if __name__ == "__main__":
     parser.add_argument("-doi", help="DOI to harvest")
     parser.add_argument("-actor", help="Name of actor to use for review message")
     parser.add_argument("-report", help="Generate a report only", action="store_true")
+    parser.add_argument("-print", help="Print out DOIs (no harvesting)", action="store_true")
     args = parser.parse_args()
 
     harvest_type = args.harvest_type
@@ -176,15 +177,25 @@ if __name__ == "__main__":
     if harvest_type == "crossref":
         dois = get_crossref_ror()
         review_message = (
-                "Added by Tom during testing, should be a valid article from WOS harvest"
-                #"Automatically added from Crossref based on Caltech ROR affiliation"
+                "Automatically added from Crossref based on Caltech ROR affiliation"
         )
-        dois = ['10.1051/0004-6361/202346526','10.1016/j.palaeo.2023.111756']
+        if args.print:
+            ostring = 'dois: '
+            for doi in dois:
+                ostrong += f' {doi}'
+            print(ostring)
+            dois = []
     elif harvest_type == "orcid":
         dois = get_orcid_works(args.orcid)
         review_message = (
             f"Automatically added from ORCID from record {args.orcid} by {args.actor}"
         )
+        if args.print:
+            ostring = 'dois: '
+            for doi in dois:
+                ostrong += f' {doi}'
+            print(ostring)
+            dois = []
     elif harvest_type == "doi":
         dois = args.doi.split(" ")
         review_message = f"Automatically added by {args.actor} as part of import from DOI list: {args.doi}"
