@@ -24,7 +24,7 @@ jobs:
       - name: Harvest DOIs
         shell: bash
         id: harvest
-        run: python harvest.py crossref -print
+        run: python harvest.py crossref -print >> $GITHUB_OUTPUT
   prepare-dois:
     name: Prepare Matrix Output of DOIs
     needs: [get-crossref]
