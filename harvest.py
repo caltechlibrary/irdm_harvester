@@ -45,25 +45,26 @@ def cleanup_metadata(metadata):
                 f["id"] = licenses[link]
             else:
                 f["title"]["en"] = "Unknown"
-            if f["description"]["en"] == "vor":
-                rights.append(f)
-                if f["id"] == 'cc-by-4.0':
-                    doi = metadata["pids"]["doi"]["identifier"]
-                    response = requests.get('https://api.crossref.org/works/' + doi)
-                    if response.status_code == 200:
-                        data = response.json()
-                        try:
-                            links = data["message"]["link"]
-                            for link in links:
-                                if link["content-type"] == "application/pdf":
-                                    link = link["URL"]
-                                    requests.get(link)
-                                    fname = f"{doi.replace('/','_')}.pdf"
-                                    with open(fname, "wb") as f:
-                                        f.write(response.content)
-                                    files = fname
-                        except:
-                            pass
+            # Not supporting file download till v12
+            #if f["description"]["en"] == "vor":
+            #    rights.append(f)
+            #    if f["id"] == 'cc-by-4.0':
+            #        doi = metadata["pids"]["doi"]["identifier"]
+            #        response = requests.get('https://api.crossref.org/works/' + doi)
+            #        if response.status_code == 200:
+            #            data = response.json()
+            #            try:
+            #                links = data["message"]["link"]
+            #                for link in links:
+            #                    if link["content-type"] == "application/pdf":
+            #                        link = link["URL"]
+            #                        requests.get(link)
+            #                        fname = f"{doi.replace('/','_')}.pdf"
+            #                        with open(fname, "wb") as f:
+            #                            f.write(response.content)
+            #                        files = fname
+            #            except:
+            #                pass
     metadata["metadata"]["rights"] = rights
     return metadata, files
 
