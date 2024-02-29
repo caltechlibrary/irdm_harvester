@@ -269,7 +269,8 @@ if __name__ == "__main__":
                     # with open("harvested_dois.txt", "a") as f:
                     #    f.write(doi + "\n")
                 except Exception as e:
-                    print(f"error= system error with doi2rdm {e.replace("'","/"}}")
+                    cleaned = e.replace("'","/")
+                    print(f"error= system error with doi2rdm {cleaned}")
             else:
                 print(f"error=DOI {doi} has already been harvested, skipping")
         else:
