@@ -6,7 +6,7 @@
   "codeRepository": "https://github.com/caltechlibrary/irdm_harvester",
   "issueTracker": "https://github.com/caltechlibrary/irdm_harvester/issues",
   "license": "https://data.caltech.edu/license",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": [
     {
       "@type": "Person",
@@ -21,7 +21,7 @@
     }],
   "developmentStatus": "active",
   "downloadUrl":
-  "https://github.com/caltechlibrary/irdm_harvester/archive/0.1.0.zip",
+  "https://github.com/caltechlibrary/irdm_harvester/archive/0.2.0.zip",
   "keywords": [
     "metadata",
     "CrossRef",
