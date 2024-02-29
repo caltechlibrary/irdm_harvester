@@ -38,7 +38,7 @@ def cleanup_metadata(metadata):
             licenses[row["props__url"]] = row["id"]
     rights = []
     files = None
-    if "rights" in metadata['metadata']:
+    if "rights" in metadata["metadata"]:
         for f in metadata["metadata"]["rights"]:
             link = f["link"]
             if link in licenses:
@@ -46,7 +46,7 @@ def cleanup_metadata(metadata):
             else:
                 f["title"]["en"] = "Unknown"
             # Not supporting file download till v12
-            #if f["description"]["en"] == "vor":
+            # if f["description"]["en"] == "vor":
             #    rights.append(f)
             #    if f["id"] == 'cc-by-4.0':
             #        doi = metadata["pids"]["doi"]["identifier"]
@@ -171,7 +171,6 @@ def read_outputs():
 
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser(
         description="Harvest DOIs from Crossref or ORCID and add to CaltechAUTHORS"
     )
@@ -180,12 +179,14 @@ if __name__ == "__main__":
     parser.add_argument("-doi", help="DOI to harvest")
     parser.add_argument("-actor", help="Name of actor to use for review message")
     parser.add_argument("-report", help="Generate a report only", action="store_true")
-    parser.add_argument("-print", help="Print out DOIs (no harvesting)", action="store_true")
+    parser.add_argument(
+        "-print", help="Print out DOIs (no harvesting)", action="store_true"
+    )
     args = parser.parse_args()
 
     harvest_type = args.harvest_type
 
-    token = os.getenv("RDMTOKTEST")
+    token = os.getenv("RDMTOK")
 
     # Get DOIs that have already been harvested
     with open("harvested_dois.txt") as infile:
@@ -196,12 +197,12 @@ if __name__ == "__main__":
     if harvest_type == "crossref":
         dois = get_crossref_ror()
         review_message = (
-                "Automatically added from Crossref based on Caltech ROR affiliation"
+            "Automatically added from Crossref based on Caltech ROR affiliation"
         )
         if args.print:
-            ostring = 'dois='
+            ostring = "dois="
             for doi in dois:
-                ostring += f' {doi}'
+                ostring += f" {doi}"
             print(ostring)
             dois = []
     elif harvest_type == "orcid":
@@ -210,9 +211,9 @@ if __name__ == "__main__":
             f"Automatically added from ORCID from record {args.orcid} by {args.actor}"
         )
         if args.print:
-            ostring = 'dois= '
+            ostring = "dois= "
             for doi in dois:
-                ostring += f' {doi}'
+                ostring += f" {doi}"
             print(ostring)
             dois = []
     elif harvest_type == "doi":
@@ -254,18 +255,18 @@ if __name__ == "__main__":
                     transformed = subprocess.check_output(["doi2rdm", doi])
                     data = transformed.decode("utf-8")
                     data = json.loads(data)
-                    data,files = cleanup_metadata(data)
+                    data, files = cleanup_metadata(data)
                     response = caltechdata_write(
                         data,
                         token,
-                        production=False,
+                        production=True,
                         authors=True,
                         community=community,
                         review_message=review_message,
-                        files=files
+                        files=files,
                     )
-                    print("doi=",doi)
-                    #with open("harvested_dois.txt", "a") as f:
+                    print("doi=", doi)
+                    # with open("harvested_dois.txt", "a") as f:
                     #    f.write(doi + "\n")
                 except Exception as e:
                     print(f"error= system error with doi2rdm {e}")

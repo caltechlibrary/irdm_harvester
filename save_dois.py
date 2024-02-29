@@ -2,7 +2,7 @@ import sys, json
 
 result = json.loads(sys.argv[1])
 
-dois = result['doi']
+dois = result["doi"]
 
 for doi in dois.keys():
     if dois[doi] != None:
