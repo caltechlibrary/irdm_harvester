@@ -8,10 +8,10 @@ authors:
 abstract: Automatic harvester for adding content to an InvenioRDM repository.
 repository-code: "https://github.com/caltechlibrary/irdm_harvester"
 type: software
-version: 0.1.0
+version: 0.2.0
 license-url: "https://data.caltech.edu/license"
 keywords:
   - metadata
   - CrossRef
   - InvenioRDM
-date-released: 2023-11-22
+date-released: 2024-02-29
