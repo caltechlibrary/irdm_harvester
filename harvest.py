@@ -210,7 +210,7 @@ if __name__ == "__main__":
             f"Automatically added from ORCID from record {args.orcid} by {args.actor}"
         )
         if args.print:
-            ostring = 'dois: '
+            ostring = 'dois= '
             for doi in dois:
                 ostring += f' {doi}'
             print(ostring)
