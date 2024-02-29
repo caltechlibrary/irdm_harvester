@@ -185,7 +185,7 @@ if __name__ == "__main__":
 
     harvest_type = args.harvest_type
 
-    token = os.getenv("RDMTOK")
+    token = os.getenv("RDMTOKTEST")
 
     # Get DOIs that have already been harvested
     with open("harvested_dois.txt") as infile:
@@ -258,7 +258,7 @@ if __name__ == "__main__":
                     response = caltechdata_write(
                         data,
                         token,
-                        production=True,
+                        production=False,
                         authors=True,
                         community=community,
                         review_message=review_message,
