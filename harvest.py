@@ -37,17 +37,36 @@ def cleanup_metadata(metadata):
         for row in reader:
             licenses[row["props__url"]] = row["id"]
     rights = []
-    if "rights" in "metadata":
+    files = None
+    if "rights" in metadata["metadata"]:
         for f in metadata["metadata"]["rights"]:
             link = f["link"]
             if link in licenses:
                 f["id"] = licenses[link]
             else:
                 f["title"]["en"] = "Unknown"
-            if f["description"]["en"] == "vor":
-                rights.append(f)
+            # Not supporting file download till v12
+            # if f["description"]["en"] == "vor":
+            #    rights.append(f)
+            #    if f["id"] == 'cc-by-4.0':
+            #        doi = metadata["pids"]["doi"]["identifier"]
+            #        response = requests.get('https://api.crossref.org/works/' + doi)
+            #        if response.status_code == 200:
+            #            data = response.json()
+            #            try:
+            #                links = data["message"]["link"]
+            #                for link in links:
+            #                    if link["content-type"] == "application/pdf":
+            #                        link = link["URL"]
+            #                        requests.get(link)
+            #                        fname = f"{doi.replace('/','_')}.pdf"
+            #                        with open(fname, "wb") as f:
+            #                            f.write(response.content)
+            #                        files = fname
+            #            except:
+            #                pass
     metadata["metadata"]["rights"] = rights
-    return metadata
+    return metadata, files
 
 
 def get_orcid_works(orcid):
@@ -152,7 +171,6 @@ def read_outputs():
 
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser(
         description="Harvest DOIs from Crossref or ORCID and add to CaltechAUTHORS"
     )
@@ -161,6 +179,9 @@ if __name__ == "__main__":
     parser.add_argument("-doi", help="DOI to harvest")
     parser.add_argument("-actor", help="Name of actor to use for review message")
     parser.add_argument("-report", help="Generate a report only", action="store_true")
+    parser.add_argument(
+        "-print", help="Print out DOIs (no harvesting)", action="store_true"
+    )
     args = parser.parse_args()
 
     harvest_type = args.harvest_type
@@ -176,15 +197,25 @@ if __name__ == "__main__":
     if harvest_type == "crossref":
         dois = get_crossref_ror()
         review_message = (
-                "Added by Tom during testing, should be a valid article from WOS harvest"
-                #"Automatically added from Crossref based on Caltech ROR affiliation"
+            "Automatically added from Crossref based on Caltech ROR affiliation"
         )
-        dois = ['10.1051/0004-6361/202346526','10.1016/j.palaeo.2023.111756']
+        if args.print:
+            ostring = "dois="
+            for doi in dois:
+                ostring += f" {doi}"
+            print(ostring)
+            dois = []
     elif harvest_type == "orcid":
         dois = get_orcid_works(args.orcid)
         review_message = (
             f"Automatically added from ORCID from record {args.orcid} by {args.actor}"
         )
+        if args.print:
+            ostring = "dois= "
+            for doi in dois:
+                ostring += f" {doi}"
+            print(ostring)
+            dois = []
     elif harvest_type == "doi":
         dois = args.doi.split(" ")
         review_message = f"Automatically added by {args.actor} as part of import from DOI list: {args.doi}"
@@ -224,7 +255,7 @@ if __name__ == "__main__":
                     transformed = subprocess.check_output(["doi2rdm", doi])
                     data = transformed.decode("utf-8")
                     data = json.loads(data)
-                    data = cleanup_metadata(data)
+                    data, files = cleanup_metadata(data)
                     response = caltechdata_write(
                         data,
                         token,
@@ -232,12 +263,14 @@ if __name__ == "__main__":
                         authors=True,
                         community=community,
                         review_message=review_message,
+                        files=files,
                     )
-                    print("doi=",doi)
-                    #with open("harvested_dois.txt", "a") as f:
+                    print("doi=", doi)
+                    # with open("harvested_dois.txt", "a") as f:
                     #    f.write(doi + "\n")
-                except:
-                    print("error= system error with doi2rdm")
+                except Exception as e:
+                    cleaned = e.replace("'","/")
+                    print(f"error= system error with doi2rdm {cleaned}")
             else:
                 print(f"error=DOI {doi} has already been harvested, skipping")
         else:
