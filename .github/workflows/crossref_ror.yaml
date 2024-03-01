@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       dois: ${{ steps.harvest.outputs.dois }}
+      commit_hash: ${{ steps.commit-and-push.outputs.commit_hash }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,11 +26,11 @@ jobs:
         shell: bash
         id: harvest
         run: python harvest.py crossref -print >> $GITHUB_OUTPUT
-      - name: Commit Files
-        uses: EndBug/add-and-commit@v9
+      - name: Commit and Push Changes
+        id: commit-and-push
+        uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          message: 'Update run date'
-          add: "['last_run.txt']"
+          commit_message: 'Update run date'
   prepare-dois:
     name: Prepare Matrix Output of DOIs
     needs: [get-crossref]
@@ -97,12 +98,14 @@ jobs:
   write-output:
     name: Write Output
     runs-on: ubuntu-latest
-    needs: [harvest]
+    needs: [harvest,get-crossref]
     outputs:
       result: "${{ steps.read.outputs.result }}"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.get-crossref.outputs.commit_hash }}
       - name: read
         uses: cloudposse/github-action-matrix-outputs-read@main
         id: read
