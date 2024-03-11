@@ -114,11 +114,11 @@ jobs:
       - name: write DOI
         run: |
           python save_dois.py '${{steps.read.outputs.result}}'
-      - name: Commit File
-        uses: EndBug/add-and-commit@v9
+      - name: Commit and Push Changes
+        id: commit-and-push
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          message: 'Update harvested_dois.txt'
-          add: "['harvested_dois.txt']"
+          commit_message: 'Update harvested DOIs'
   report-status:
     name: Report Status
     runs-on: ubuntu-latest
