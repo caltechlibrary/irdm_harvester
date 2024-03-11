@@ -875,3 +875,12 @@ https://doi.org/10.1016/j.psycr.2023.100173
 10.1016/j.carbpol.2023.121699
 10.1016/j.stem.2023.11.013
 10.1364/optica.516479
+10.1021/acscentsci.3c01480
+10.1021/acs.nanolett.3c04476
+10.1021/jacs.4c00593
+10.1021/acs.jctc.3c01365
+10.1021/acs.macromol.3c02437
+10.1021/acs.jctc.3c01264
+10.1021/acsphotonics.3c00457
+10.1021/acsearthspacechem.3c00287
+10.1021/acs.macromol.3c02054
