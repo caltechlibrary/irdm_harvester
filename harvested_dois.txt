@@ -903,3 +903,7 @@ https://doi.org/10.1016/j.mattod.2023.09.006
 10.1016/j.mattod.2023.09.006
 10.1126/scirobotics.adh8332
 10.1038/s41586-024-07117-5
+10.1021/acscatal.3c05072
+10.1021/acs.chemrev.3c00356
+10.1021/acsbiomaterials.3c01430
+10.1021/acsenergylett.4c00204
