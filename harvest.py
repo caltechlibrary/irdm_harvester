@@ -255,6 +255,10 @@ if __name__ == "__main__":
                     transformed = subprocess.check_output(["doi2rdm", "crossref", doi])
                     data = transformed.decode("utf-8")
                     data = json.loads(data)
+                except Exception as e:
+                    cleaned = str(e).replace("'","/")
+                    print(f"error= system error with doi2rdm {cleaned}")
+                try:
                     data, files = cleanup_metadata(data)
                     response = caltechdata_write(
                         data,
@@ -266,11 +270,9 @@ if __name__ == "__main__":
                         files=files,
                     )
                     print("doi=", doi)
-                    # with open("harvested_dois.txt", "a") as f:
-                    #    f.write(doi + "\n")
                 except Exception as e:
                     cleaned = str(e).replace("'","/")
-                    print(f"error= system error with doi2rdm {cleaned}")
+                    print(f"error= system error with writing metadata to CaltechAUTHORS {cleaned}")
             else:
                 print(f"error=DOI {doi} has already been harvested, skipping")
         else:
