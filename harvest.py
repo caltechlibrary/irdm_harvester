@@ -7,7 +7,7 @@ from idutils import normalize_doi
 from check_doi import check_doi
 from caltechdata_api import caltechdata_write
 from wos import get_wos_dois
-from traceback import print_exc
+from traceback import format_exc
 
 
 def match_orcid(creator, orcid):
@@ -260,7 +260,7 @@ if __name__ == "__main__":
                     data = transformed.decode("utf-8")
                     data = json.loads(data)
                 except Exception as e:
-                    cleaned = str(print_exc()).replace("'","/")
+                    cleaned = str(format_exc()).replace("'","/")
                     print(f"error= system error with doi2rdm {cleaned}")
                 try:
                     data, files = cleanup_metadata(data)
@@ -275,7 +275,7 @@ if __name__ == "__main__":
                     )
                     print("doi=", doi)
                 except Exception as e:
-                    cleaned = str(e).replace("'","/")
+                    cleaned = str(format_exc()).replace("'","/")
                     print(f"error= system error with writing metadata to CaltechAUTHORS {cleaned}")
             else:
                 print(f"error=DOI {doi} has already been harvested, skipping")
