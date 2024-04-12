@@ -66,6 +66,8 @@ def cleanup_metadata(metadata):
             #            except:
             #                pass
     metadata["metadata"]["rights"] = rights
+    # Detailed dates aren't currently desired
+    metadata["metadata"].pop("dates")
     return metadata, files
 
 
@@ -252,7 +254,7 @@ if __name__ == "__main__":
         if not check_doi(doi, production=True, token=token):
             if doi not in harvested_dois:
                 try:
-                    transformed = subprocess.check_output(["doi2rdm", "crossref", doi])
+                    transformed = subprocess.check_output(["doi2rdm", doi])
                     data = transformed.decode("utf-8")
                     data = json.loads(data)
                 except Exception as e:
