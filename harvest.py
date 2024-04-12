@@ -41,12 +41,12 @@ def cleanup_metadata(metadata):
     files = None
     if "rights" in metadata["metadata"]:
         for f in metadata["metadata"]["rights"]:
-            #if 'link' in f:
-            link = f["link"]
-            if link in licenses:
-                f["id"] = licenses[link]
-            else:
-                f["title"]["en"] = "Unknown"
+            if "link" in f:
+                link = f["link"]
+                if link in licenses:
+                    f["id"] = licenses[link]
+                else:
+                    f["title"]["en"] = "Unknown"
             # Not supporting file download till v12
             # if f["description"]["en"] == "vor":
             #    rights.append(f)
@@ -261,7 +261,14 @@ if __name__ == "__main__":
                     data = transformed.decode("utf-8")
                     data = json.loads(data)
                 except Exception as e:
-                    cleaned = str(format_exc()).replace("'","/")
+                    cleaned = (
+                        format_exc()
+                        .replace("\n", "-")
+                        .replace(":", "-")
+                        .replace("'", "-")
+                        .replace('"', "-")
+                        .replace("=", "-")
+                    )
                     print(f"error= system error with doi2rdm {cleaned}")
                 try:
                     data, files = cleanup_metadata(data)
@@ -276,8 +283,17 @@ if __name__ == "__main__":
                     )
                     print("doi=", doi)
                 except Exception as e:
-                    cleaned = format_exc().replace('\n','-').replace(":","-").replace("'","-").replace('"',"-").replace("=", "-")
-                    print(f"error= system error with writing metadata to CaltechAUTHORS {cleaned}")
+                    cleaned = (
+                        format_exc()
+                        .replace("\n", "-")
+                        .replace(":", "-")
+                        .replace("'", "-")
+                        .replace('"', "-")
+                        .replace("=", "-")
+                    )
+                    print(
+                        f"error= system error with writing metadata to CaltechAUTHORS {cleaned}"
+                    )
             else:
                 print(f"error=DOI {doi} has already been harvested, skipping")
         else:
