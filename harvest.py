@@ -3,7 +3,7 @@ import argparse
 import datetime
 import subprocess
 import requests
-from idutils import normalize_doi, is_arxiv, normalize_arxiv
+from idutils import normalize_doi
 from check_doi import check_doi
 from caltechdata_api import caltechdata_write
 from wos import get_wos_dois
@@ -252,12 +252,7 @@ if __name__ == "__main__":
         print("error: system error invalid harvest type")
 
     for doi in dois:
-        # If we have arxiv
-        if is_arxiv(doi):
-            #arxiv isn't a DOI, but is supported
-            doi = normalize_arxiv(doi)
-        else:
-            doi = normalize_doi(doi)
+        doi = normalize_doi(doi)
         if not check_doi(doi, production=True, token=token):
             if doi not in harvested_dois:
                 try:
