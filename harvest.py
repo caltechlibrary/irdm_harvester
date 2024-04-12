@@ -276,7 +276,7 @@ if __name__ == "__main__":
                     )
                     print("doi=", doi)
                 except Exception as e:
-                    cleaned = format_exc().replace(":","-").replace("'","-").replace('"',"-")
+                    cleaned = format_exc().replace('/n','-').replace(":","-").replace("'","-").replace('"',"-")
                     print(f"error= system error with writing metadata to CaltechAUTHORS {cleaned}")
             else:
                 print(f"error=DOI {doi} has already been harvested, skipping")
