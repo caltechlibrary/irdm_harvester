@@ -260,7 +260,7 @@ if __name__ == "__main__":
                     data = transformed.decode("utf-8")
                     data = json.loads(data)
                 except Exception as e:
-                    cleaned = print_exc().replace("'","/")
+                    cleaned = str(print_exc()).replace("'","/")
                     print(f"error= system error with doi2rdm {cleaned}")
                 try:
                     data, files = cleanup_metadata(data)
