@@ -41,6 +41,7 @@ def cleanup_metadata(metadata):
     files = None
     if "rights" in metadata["metadata"]:
         for f in metadata["metadata"]["rights"]:
+            #if 'link' in f:
             link = f["link"]
             if link in licenses:
                 f["id"] = licenses[link]
@@ -275,7 +276,7 @@ if __name__ == "__main__":
                     )
                     print("doi=", doi)
                 except Exception as e:
-                    cleaned = str(format_exc()).replace("'","-").replace('"',"-")
+                    cleaned = str(format_exc()).replace("'","-").replace('"',"-").replace("\n","-")
                     print(f"error= system error with writing metadata to CaltechAUTHORS {cleaned}")
             else:
                 print(f"error=DOI {doi} has already been harvested, skipping")
