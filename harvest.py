@@ -3,10 +3,11 @@ import argparse
 import datetime
 import subprocess
 import requests
-from idutils import normalize_doi
+from idutils import normalize_doi, is_arxiv, normalize_arxiv
 from check_doi import check_doi
 from caltechdata_api import caltechdata_write
 from wos import get_wos_dois
+from traceback import print_exc
 
 
 def match_orcid(creator, orcid):
@@ -67,7 +68,8 @@ def cleanup_metadata(metadata):
             #                pass
     metadata["metadata"]["rights"] = rights
     # Detailed dates aren't currently desired
-    metadata["metadata"].pop("dates")
+    if "dates" in metadata["metadata"]:
+        metadata["metadata"].pop("dates")
     return metadata, files
 
 
@@ -250,7 +252,12 @@ if __name__ == "__main__":
         print("error: system error invalid harvest type")
 
     for doi in dois:
-        doi = normalize_doi(doi)
+        # If we have arxiv
+        if is_arxiv(doi):
+            #arxiv isn't a DOI, but is supported
+            doi = normalize_arxiv(doi)
+        else:
+            doi = normalize_doi(doi)
         if not check_doi(doi, production=True, token=token):
             if doi not in harvested_dois:
                 try:
@@ -258,7 +265,7 @@ if __name__ == "__main__":
                     data = transformed.decode("utf-8")
                     data = json.loads(data)
                 except Exception as e:
-                    cleaned = str(e).replace("'","/")
+                    cleaned = print_exc().replace("'","/")
                     print(f"error= system error with doi2rdm {cleaned}")
                 try:
                     data, files = cleanup_metadata(data)
