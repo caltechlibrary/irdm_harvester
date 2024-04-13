@@ -268,6 +268,8 @@ if __name__ == "__main__":
                         .replace("'", "-")
                         .replace('"', "-")
                         .replace("=", "-")
+                        .replace("(", "-")
+                        .replace(")", "-")
                     )
                     print(f"error= system error with doi2rdm {cleaned}")
                 try:
@@ -290,6 +292,8 @@ if __name__ == "__main__":
                         .replace("'", "-")
                         .replace('"', "-")
                         .replace("=", "-")
+                        .replace("(", "-")
+                        .replace(")", "-")
                     )
                     print(
                         f"error= system error with writing metadata to CaltechAUTHORS {cleaned}"
