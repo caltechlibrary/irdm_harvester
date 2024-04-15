@@ -1046,3 +1046,11 @@ https://doi.org/10.1016/j.epsl.2024.118695
 10.1021/acsphyschemau.3c00078
 10.1021/acscatal.4c00156
 10.1021/acs.langmuir.3c04011
+10.1021/acsphotonics.3c01588
+10.1021/acs.jpclett.4c00159
+10.1021/acsaem.3c03269
+10.1021/acscentsci.3c01438
+10.1021/acs.jpcb.4c00829
+10.1021/acsaem.4c00135
+10.1021/acs.jctc.3c01385
+10.1021/jacsau.4c00069
