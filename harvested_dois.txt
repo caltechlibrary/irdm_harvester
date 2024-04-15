@@ -1043,3 +1043,6 @@ https://doi.org/10.1016/j.mattod.2023.09.006
 10.1038/s41467-024-47521-z
 https://doi.org/10.48550/arXiv.2401.12460
 https://doi.org/10.1016/j.epsl.2024.118695
+10.1021/acsphyschemau.3c00078
+10.1021/acscatal.4c00156
+10.1021/acs.langmuir.3c04011
