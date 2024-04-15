@@ -1038,3 +1038,5 @@ https://doi.org/10.1016/j.mattod.2023.09.006
 10.1101/2023.11.09.566364
 10.1093/bioinformatics/btae168
 10.3390/nano14070595
+10.1103/PhysRevResearch.6.023045
+10.1103/PRXQuantum.5.020310
