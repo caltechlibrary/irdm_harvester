@@ -257,7 +257,7 @@ if __name__ == "__main__":
         if not check_doi(doi, production=True, token=token):
             if doi not in harvested_dois:
                 try:
-                    transformed = subprocess.check_output(["doi2rdm", doi])
+                    transformed = subprocess.check_output(["doi2rdm", "options.yaml", doi])
                     data = transformed.decode("utf-8")
                     data = json.loads(data)
                 except Exception as e:
