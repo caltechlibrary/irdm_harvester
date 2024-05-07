@@ -25,15 +25,15 @@ def match_orcid(creator, orcid):
 def cleanup_metadata(metadata):
     # Read in groups list
     groups_list = {}
-    with open(group_tagging.csv) as infile:
+    with open("group_tagging.csv") as infile:
         reader = csv.DictReader(infile)
         for row in reader:
-            if row["ORCID"] not in groups:
+            if row["ORCID"] not in groups_list:
                 groups_list[row["ORCID"]] = [row["Tag"]]
             else:
                 groups_list[row["ORCID"]].append(row["Tag"])
     # Match creators by ORCID
-    groups = []
+    groups = set()
     for creator in metadata["metadata"]["creators"]:
         person = creator["person_or_org"]
         if "identifiers" in person:
@@ -42,7 +42,12 @@ def cleanup_metadata(metadata):
                     orcid = identifier["identifier"]
                     match_orcid(creator, orcid)
                     if orcid in groups_list:
-                        groups += groups_list[orcid]
+                        groups.update(groups_list[orcid])
+    if groups:
+        g_list = []
+        for group in groups:
+            g_list.append({"id": group})
+        metadata["custom_fields"]["caltech:groups"] = g_list
     # Clean up licenses
     licenses = {}
     with open("licenses.csv") as infile:
@@ -269,7 +274,9 @@ if __name__ == "__main__":
         if not check_doi(doi, production=True, token=token):
             if doi not in harvested_dois:
                 try:
-                    transformed = subprocess.check_output(["doi2rdm", "options.yaml", doi])
+                    transformed = subprocess.check_output(
+                        ["doi2rdm", "options.yaml", doi]
+                    )
                     data = transformed.decode("utf-8")
                     data = json.loads(data)
                 except Exception as e:
