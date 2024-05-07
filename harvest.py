@@ -23,7 +23,17 @@ def match_orcid(creator, orcid):
 
 
 def cleanup_metadata(metadata):
+    # Read in groups list
+    groups_list = {}
+    with open(group_tagging.csv) as infile:
+        reader = csv.DictReader(infile)
+        for row in reader:
+            if row["ORCID"] not in groups:
+                groups_list[row["ORCID"]] = [row["Tag"]]
+            else:
+                groups_list[row["ORCID"]].append(row["Tag"])
     # Match creators by ORCID
+    groups = []
     for creator in metadata["metadata"]["creators"]:
         person = creator["person_or_org"]
         if "identifiers" in person:
@@ -31,6 +41,8 @@ def cleanup_metadata(metadata):
                 if identifier["scheme"] == "orcid":
                     orcid = identifier["identifier"]
                     match_orcid(creator, orcid)
+                    if orcid in groups_list:
+                        groups += groups_list[orcid]
     # Clean up licenses
     licenses = {}
     with open("licenses.csv") as infile:
