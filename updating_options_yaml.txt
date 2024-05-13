@@ -1,0 +1,29 @@
+
+# Updating the options.yaml
+
+The options.yaml is used by doi2rdm from the irdmtools repository to map various metadata.
+This includes publisher and journal titles. Publishers are first mapped via ISSN and there
+is no match then the DOI prefix is checked for mapping. If a match is found it will 
+update the imported metadata for the publisher to match the mapping in options.yaml
+(see publisher_issn attribute values).  The Journal title is also checked against the ISSN
+but NOT the DOI prefix. The mapping can be found in the journal_issn attribute.
+
+The publisher and journal information is harvested from a CSV file currently (May 2024)
+curated by George Porter (this will change after June). There is a tool in irdmtools, a
+python script named update_publishers_options.py that can update the options.yaml based
+on the current contents of the spreadsheet. This will not delete the existing options
+content only add or replace the matching ISSN/DOI Prefixes.  The tool writes to
+standard output. This is what I do to update options.yaml from a CSV file called
+CaltechAUTHORS_publisher_groups.csv.
+
+~~~shell
+./update_publisher_options.py options.yaml CaltechAUTHORS_publisher_groups.csv \
+    >new_options.yaml
+~~~
+
+I then look new_options.yaml over, might not hurst to test against known DOI and arXiv
+identifiers. When I think new_options.yaml is correct then I move the file to 
+options.yaml in the irdm_harvester repository and update the Git repo.
+
+- RSD, 2024-05-13
+
