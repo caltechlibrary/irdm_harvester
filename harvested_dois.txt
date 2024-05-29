@@ -1396,3 +1396,7 @@ https://doi.org/10.1016/j.jpedcp.2024.200118
 https://doi.org/10.1016/j.ijsolstr.2024.112865
 https://doi.org/10.1016/j.jcp.2024.113128
 10.1016/j.copbio.2024.103150
+https://doi.org/10.1016/j.fufo.2024.100375
+https://doi.org/10.1016/j.cpc.2024.109238
+https://doi.org/10.1016/j.cels.2024.04.006
+https://doi.org/10.1016/j.jlr.2024.100563
