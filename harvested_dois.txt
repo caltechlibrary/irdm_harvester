@@ -1390,3 +1390,9 @@ https://doi.org/10.48550/arXiv.2401.16592
 10.3847/PSJ/ad3d55
 10.3847/1538-3881/ad3df2
 10.3847/1538-3881/ad34d9
+https://doi.org/10.1016/j.physd.2024.134192
+https://doi.org/10.1016/j.gca.2024.05.026
+https://doi.org/10.1016/j.jpedcp.2024.200118
+https://doi.org/10.1016/j.ijsolstr.2024.112865
+https://doi.org/10.1016/j.jcp.2024.113128
+10.1016/j.copbio.2024.103150
