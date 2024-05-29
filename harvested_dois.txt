@@ -1400,3 +1400,13 @@ https://doi.org/10.1016/j.fufo.2024.100375
 https://doi.org/10.1016/j.cpc.2024.109238
 https://doi.org/10.1016/j.cels.2024.04.006
 https://doi.org/10.1016/j.jlr.2024.100563
+https://doi.org/10.1016/j.cej.2024.151625
+https://doi.org/10.1016/j.cub.2024.04.016
+https://doi.org/10.1016/j.biopha.2024.116660
+https://doi.org/10.1016/j.jpha.2024.101001
+https://doi.org/10.1016/j.epsl.2024.118697
+https://doi.org/10.1016/S2589-7500(24)00047-5
+https://doi.org/10.1016/j.jpowsour.2024.234427
+https://doi.org/10.1016/j.chemgeo.2024.122142
+https://doi.org/10.1016/j.jcoa.2024.100134
+https://doi.org/10.1016/j.rse.2024.114192
