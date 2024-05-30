@@ -1410,3 +1410,6 @@ https://doi.org/10.1016/j.jpowsour.2024.234427
 https://doi.org/10.1016/j.chemgeo.2024.122142
 https://doi.org/10.1016/j.jcoa.2024.100134
 https://doi.org/10.1016/j.rse.2024.114192
+10.1021/acs.jpcb.4c00053
+https://doi.org/10.1021/acscatal.4c02036
+https://doi.org/10.1016/j.reactfunctpolym.2024.105949
