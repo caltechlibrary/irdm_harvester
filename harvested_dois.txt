@@ -1696,3 +1696,8 @@ https://doi.org/10.48550/arXiv.2403.08997
 10.1101/2023.06.13.541482
 10.1039/d4cc01189a
 10.1109/LCSYS.2024.3416239
+https://doi.org/10.1016/j.ijmecsci.2024.109479
+https://doi.org/10.1016/j.isci.2024.110378
+https://doi.org/10.1016/j.fusengdes.2024.114552
+https://doi.org/10.1016/j.jet.2024.105871
+https://doi.org/10.1016/j.gca.2024.06.012
