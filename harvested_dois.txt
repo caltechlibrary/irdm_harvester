@@ -1706,3 +1706,9 @@ https://doi.org/10.1016/j.ascom.2024.100850
 https://doi.org/10.1016/j.jcp.2024.113199
 https://doi.org/10.1016/j.carbon.2024.119337
 https://doi.org/10.1016/j.cej.2024.153049
+https://doi.org/10.1016/j.laa.2024.06.001
+https://doi.org/10.1016/j.aim.2024.109738
+https://doi.org/10.1016/j.jcp.2024.113157
+https://doi.org/10.1016/j.jmps.2024.105709
+https://doi.org/10.1016/j.eng.2024.05.012
+https://doi.org/10.1016/j.matt.2024.05.002
