@@ -1724,3 +1724,7 @@ https://doi.org/10.1016/j.mechmat.2024.104970
 https://doi.org/10.1016/j.electacta.2024.144077
 https://doi.org/10.1016/j.matt.2024.01.001
 https://doi.org/10.1016/j.oreoa.2024.100044
+https://doi.org/10.1016/j.jvolgeores.2024.108037
+https://doi.org/10.1016/j.fuel.2024.131307
+https://doi.org/10.1016/j.lithos.2024.107553
+https://doi.org/10.1016/j.tecto.2024.230262
