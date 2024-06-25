@@ -1712,3 +1712,9 @@ https://doi.org/10.1016/j.jcp.2024.113157
 https://doi.org/10.1016/j.jmps.2024.105709
 https://doi.org/10.1016/j.eng.2024.05.012
 https://doi.org/10.1016/j.matt.2024.05.002
+https://doi.org/10.1016/j.advengsoft.2024.103632
+https://doi.org/10.1016/j.nuclphysb.2024.116515
+https://doi.org/10.1016/j.tetlet.2024.155011
+https://doi.org/10.1016/j.jcp.2024.112978
+https://doi.org/10.1016/j.jcp.2024.112948
+https://doi.org/10.1016/j.apcatb.2024.124006
