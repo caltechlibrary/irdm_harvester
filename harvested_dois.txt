@@ -1728,3 +1728,6 @@ https://doi.org/10.1016/j.jvolgeores.2024.108037
 https://doi.org/10.1016/j.fuel.2024.131307
 https://doi.org/10.1016/j.lithos.2024.107553
 https://doi.org/10.1016/j.tecto.2024.230262
+https://doi.org/10.1016/j.cej.2024.149678
+https://doi.org/10.1016/j.icarus.2024.116014
+https://doi.org/10.1016/j.memsci.2024.122563
