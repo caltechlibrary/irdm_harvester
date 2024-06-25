@@ -1701,3 +1701,8 @@ https://doi.org/10.1016/j.isci.2024.110378
 https://doi.org/10.1016/j.fusengdes.2024.114552
 https://doi.org/10.1016/j.jet.2024.105871
 https://doi.org/10.1016/j.gca.2024.06.012
+https://doi.org/10.1016/j.mechmat.2024.105073
+https://doi.org/10.1016/j.ascom.2024.100850
+https://doi.org/10.1016/j.jcp.2024.113199
+https://doi.org/10.1016/j.carbon.2024.119337
+https://doi.org/10.1016/j.cej.2024.153049
