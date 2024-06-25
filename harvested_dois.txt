@@ -1718,3 +1718,6 @@ https://doi.org/10.1016/j.tetlet.2024.155011
 https://doi.org/10.1016/j.jcp.2024.112978
 https://doi.org/10.1016/j.jcp.2024.112948
 https://doi.org/10.1016/j.apcatb.2024.124006
+https://doi.org/10.1016/j.earscirev.2024.104740
+https://doi.org/10.1016/j.gore.2024.101371
+https://doi.org/10.1016/j.mechmat.2024.104970
