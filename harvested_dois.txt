@@ -1721,3 +1721,6 @@ https://doi.org/10.1016/j.apcatb.2024.124006
 https://doi.org/10.1016/j.earscirev.2024.104740
 https://doi.org/10.1016/j.gore.2024.101371
 https://doi.org/10.1016/j.mechmat.2024.104970
+https://doi.org/10.1016/j.electacta.2024.144077
+https://doi.org/10.1016/j.matt.2024.01.001
+https://doi.org/10.1016/j.oreoa.2024.100044
