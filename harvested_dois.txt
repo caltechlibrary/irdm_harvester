@@ -1734,3 +1734,4 @@ https://doi.org/10.1016/j.memsci.2024.122563
 https://doi.org/10.1016/j.scitotenv.2024.174200
 https://doi.org/10.1016/j.ijmultiphaseflow.2024.104902
 https://doi.org/10.1016/j.chemgeo.2024.122254
+https://doi.org/10.1016/j.newar.2024.101694
