@@ -38,7 +38,7 @@ doi_prefix_publishers:
   10.26508: Rockefeller University Press
   10.5194: European Geosciences Union
 dot_initials: true
-issn_journals:
+issn_publishers:
   0002-9297: Cell Press
   0004-6256: American Astronomical Society
   0004-637X: American Astronomical Society
@@ -346,7 +346,7 @@ issn_journals:
   3005-0677: Nature Publishing Group
   3005-0685: Nature Publishing Group
   8755-1209: American Geophysical Union
-issn_publishers:
+issn_journals:
   0002-9297: AJHG
   0004-6256: Astronomical Journal
   0004-637X: Astrophysical Journal
