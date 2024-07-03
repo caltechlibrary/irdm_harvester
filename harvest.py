@@ -63,7 +63,9 @@ def cleanup_metadata(metadata):
                 if link in licenses:
                     f["id"] = licenses[link]
                 else:
-                    f["title"]["en"] = "Unknown"
+                    f["id"] = "default"
+            else:
+                f["id"] = "default"
             # Not supporting file download till v12
             # if f["description"]["en"] == "vor":
             #    rights.append(f)
