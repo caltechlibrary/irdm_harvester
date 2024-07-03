@@ -61,11 +61,7 @@ def cleanup_metadata(metadata):
             if "link" in f:
                 link = f["link"]
                 if link in licenses:
-                    f["id"] = licenses[link]
-                else:
-                    f["id"] = "default"
-            else:
-                f["id"] = "default"
+                    rights.append({"id": licenses[link]})
             # Not supporting file download till v12
             # if f["description"]["en"] == "vor":
             #    rights.append(f)
@@ -86,6 +82,8 @@ def cleanup_metadata(metadata):
             #                        files = fname
             #            except:
             #                pass
+    if rights == []:
+        rights.append({"id": "default"})
     metadata["metadata"]["rights"] = rights
     # Detailed dates aren't currently desired
     if "dates" in metadata["metadata"]:
