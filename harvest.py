@@ -242,11 +242,15 @@ if __name__ == "__main__":
         dois = args.doi.split(" ")
         review_message = f"Automatically added by {args.actor} as part of import from DOI list: {args.doi}"
     elif harvest_type == "wos":
-        # dois = get_wos_dois("1Y")
-        dois, new_dois, existing_dois, arxiv_dois = read_outputs()
+        dois = get_wos_dois("1Y")
+        new_dois = []
+        existing_dois = []
+        arxiv_dois = []
+        #dois, new_dois, existing_dois, arxiv_dois = read_outputs()
         count = 1
         while dois:
             doi = dois.pop()
+            print(doi,len(dois))
             try:
                 if not check_doi(doi, production=True, token=token):
                     if "arXiv" in doi:
@@ -262,10 +266,8 @@ if __name__ == "__main__":
                     write_outputs(dois, new_dois, existing_dois, arxiv_dois)
                 exit()
             count += 1
-        if args.report:
-            print(count)
-            write_outputs(dois, new_dois, existing_dois, arxiv_dois)
-        exit()
+        print(count)
+        write_outputs(dois, new_dois, existing_dois, arxiv_dois)
     else:
         print("error: system error invalid harvest type")
 
