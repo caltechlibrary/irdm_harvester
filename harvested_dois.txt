@@ -1997,3 +1997,4 @@ https://doi.org/10.1016/j.newar.2024.101694
 10.1103/physrevb.110.014309
 10.1364/oe.529570
 10.1103/physrevresearch.6.033084
+10.1103/prxquantum.5.030313
