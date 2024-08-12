@@ -43,6 +43,8 @@ def cleanup_metadata(metadata):
                     match_orcid(creator, orcid)
                     if orcid in groups_list:
                         groups.update(groups_list[orcid])
+    if "custom_fields" not in metadata:
+        metadata["custom_fields"] = {}
     if groups:
         g_list = []
         for group in groups:
