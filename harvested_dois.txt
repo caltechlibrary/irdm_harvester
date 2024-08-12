@@ -2033,3 +2033,4 @@ https://doi.org/10.1016/j.newar.2024.101694
 10.1103/physrevb.110.064409
 10.1103/physrevmaterials.8.084001
 10.1103/physrevresearch.6.033147
+10.1371/journal.pcbi.1011800
