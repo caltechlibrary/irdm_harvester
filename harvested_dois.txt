@@ -2035,3 +2035,4 @@ https://doi.org/10.1016/j.newar.2024.101694
 10.1103/physrevresearch.6.033147
 10.1371/journal.pcbi.1011800
 10.1103/physrevlett.133.077201
+10.1103/physrevd.110.046016
