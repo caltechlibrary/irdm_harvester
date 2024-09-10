@@ -148,7 +148,7 @@ def get_dimensions():
     dois = []
 
     endpoint = "https://cris-api.dimensions.ai/v3"
-    dimcli.login(key=key, endpoint=endpoint)
+    dimcli.login(key=key, endpoint=endpoint, verbose=False)
     dsl = dimcli.Dsl()
 
     res = dsl.query_iterative(
@@ -156,7 +156,8 @@ def get_dimensions():
         search publications
         where research_orgs.id = "grid.20861.3d"
         and date >= "{date}"
-        return publications[basics+extras] """
+        return publications[basics+extras] """,
+        verbose=False,
     )
 
     publications = res.json["publications"]
