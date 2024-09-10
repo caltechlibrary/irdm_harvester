@@ -1,0 +1,135 @@
+name: Harvest from Dimensions
+
+on:
+  schedule:
+    - cron: '10 15 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason'
+        required: false
+        default: 'Manual trigger'
+
+jobs:
+  get-crossref:
+    runs-on: ubuntu-latest
+    outputs:
+      dois: ${{ steps.harvest.outputs.dois }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Python Deps
+        shell: bash
+        run: pip install -r requirements.txt
+      - name: Harvest DOIs
+        shell: bash
+        env:
+            DIMKEY: ${{ secrets.DIMKEY }}
+        id: harvest
+        run: python harvest.py dimensions -print >> $GITHUB_OUTPUT
+  prepare-dois:
+    name: Prepare Matrix Output of DOIs
+    needs: [get-crossref]
+    runs-on: ubuntu-latest
+    outputs: 
+      dois: ${{ steps.step1.outputs.matrix }}
+    env:
+      DOI: ${{ needs.get-crossref.outputs.dois }}
+    steps: 
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Process DOIs
+        shell: bash
+        run: python split_doi.py >> $GITHUB_OUTPUT
+        id: step1
+  harvest:
+    runs-on: ubuntu-latest
+    needs: [prepare-dois]
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        doi: ${{ fromJSON(needs.prepare-dois.outputs.dois) }}
+    outputs:
+      dois: ${{ steps.step1.outputs.matrix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Python Deps
+        shell: bash
+        run: pip install -r requirements.txt
+      - name: Make downloads folder
+        shell: bash
+        run: mkdir $HOME/Downloads
+      - name: Install irdmtools
+        shell: bash
+        run: curl https://caltechlibrary.github.io/irdmtools/installer.sh | sh
+      - name: Path
+        shell: bash
+        run: cp $HOME/bin/doi2rdm $HOME/.local/bin/.
+      - name: Harvest DOIs
+        shell: bash
+        env:
+            RDMTOK: ${{ secrets.RDMTOK }}
+        id: harvest
+        run: python harvest.py doi -doi "${{matrix.doi}}" -actor ${{github.actor}} >> $GITHUB_OUTPUT
+      - uses: cloudposse/github-action-matrix-outputs-write@main
+        id: out
+        with:
+          matrix-step-name: ${{ github.job }}
+          matrix-key: ${{ matrix.doi }}
+          outputs: |-
+            doi: ${{ steps.harvest.outputs.doi }}
+            error: ${{steps.harvest.outputs.error }}
+      - name: System error on DOI
+        if: contains(steps.harvest.outputs.error, 'system')
+        run: |
+          echo ${{steps.harvest.outputs.error}}
+          false
+      - name: System intentionally skipped DOI
+        if: contains(steps.harvest.outputs.error, 'skipping')
+        run: |
+          echo ${{steps.harvest.outputs.error}}
+          false
+  write-output:
+    name: Write Output
+    runs-on: ubuntu-latest
+    needs: [harvest]
+    outputs:
+      result: "${{ steps.read.outputs.result }}"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: read
+        uses: cloudposse/github-action-matrix-outputs-read@main
+        id: read
+        with:
+          matrix-step-name: harvest
+      - name: write DOI
+        run: |
+          python save_dois.py '${{steps.read.outputs.result}}'
+      - name: Commit and Push Changes
+        id: commit-and-push
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'Update harvested DOIs'
+          file_pattern: 'harvested_dois.txt'
+  report-status:
+    name: Report Status
+    runs-on: ubuntu-latest
+    needs: [write-output]
+    outputs:
+      result: "${{ steps.read.outputs.result }}"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: read
+        uses: cloudposse/github-action-matrix-outputs-read@main
+        id: read
+        with:
+          matrix-step-name: harvest
+      - name: System error on DOI
+        run: |
+          python check_status.py '${{steps.read.outputs.result}}'

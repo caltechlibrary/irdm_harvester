@@ -1,1 +1,2 @@
 caltechdata_api>=1.4.1
+dimcli  @ git+https://github.com/caltechlibrary/dimcli@cris-auth

@@ -3,6 +3,7 @@ import argparse
 import datetime
 import subprocess
 import requests
+import dimcli
 from idutils import normalize_doi
 from check_doi import check_doi
 from caltechdata_api import caltechdata_write
@@ -140,6 +141,45 @@ def get_crossref_ror():
     return dois
 
 
+def get_dimensions():
+    key = os.getenv("DIMKEY")
+
+    date = (datetime.date.today() - datetime.timedelta(days=7)).isoformat()
+    dois = []
+
+    endpoint = "https://cris-api.dimensions.ai/v3"
+    dimcli.login(key=key, endpoint=endpoint)
+    dsl = dimcli.Dsl()
+
+    res = dsl.query_iterative(
+        f"""
+        search publications
+        where research_orgs.id = "grid.20861.3d"
+        and date >= "{date}"
+        return publications[basics+extras] """
+    )
+
+    publications = res.json["publications"]
+    caltech = False
+    for author in publication["authors"]:
+        for affiliation in author["affiliations"]:
+            if affiliation["id"] == "grid.20861.3d":
+                caltech_ind = True
+                if "91109" in affiliation["raw_affiliation"]:
+                    caltech_ind = False
+                if "Jet Propulsion Laboratory" in affiliation["raw_affiliation"]:
+                    caltech_ind = False
+            else:
+                caltech_ind = False
+        if caltech_ind:
+            caltech = True
+    if caltech:
+        if "doi" in publication:
+            dois.append(publication["doi"])
+
+    return dois
+
+
 def write_outputs(dois, new_dois, existing_dois, arxiv_dois):
     outfile = open("wos_dois.csv", "w")
     writer = csv.writer(outfile)
@@ -198,7 +238,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Harvest DOIs from Crossref or ORCID and add to CaltechAUTHORS"
     )
-    parser.add_argument("harvest_type", help="crossref, orcid, doi, ror")
+    parser.add_argument("harvest_type", help="crossref, orcid, doi, wos, dimensions")
     parser.add_argument("-orcid", help="ORCID ID to harvest from")
     parser.add_argument("-doi", help="DOI to harvest")
     parser.add_argument("-actor", help="Name of actor to use for review message")
@@ -229,6 +269,15 @@ if __name__ == "__main__":
                 ostring += f" {doi}"
             print(ostring)
             dois = []
+    elif harvest_type == "dimensions":
+        dois = get_dimensions()
+        review_message = "Automatically added from Crossref based on Caltech affiliation in Dimensions"
+        if args.print:
+            ostring = "dois="
+            for doi in dois:
+                ostring += f" {doi}"
+            print(ostring)
+            dois = []
     elif harvest_type == "orcid":
         dois = get_orcid_works(args.orcid)
         review_message = (
@@ -244,15 +293,15 @@ if __name__ == "__main__":
         dois = args.doi.split(" ")
         review_message = f"Automatically added by {args.actor} as part of import from DOI list: {args.doi}"
     elif harvest_type == "wos":
-        dois = get_wos_dois("1Y")
+        dois = get_wos_dois("2M")
         new_dois = []
         existing_dois = []
         arxiv_dois = []
-        #dois, new_dois, existing_dois, arxiv_dois = read_outputs()
+        dois, new_dois, existing_dois, arxiv_dois = read_outputs()
         count = 1
         while dois:
             doi = dois.pop()
-            print(doi,len(dois))
+            print(doi, len(dois))
             try:
                 if not check_doi(doi, production=True, token=token):
                     if "arXiv" in doi:
