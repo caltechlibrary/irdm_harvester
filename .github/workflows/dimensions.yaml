@@ -11,7 +11,7 @@ on:
         default: 'Manual trigger'
 
 jobs:
-  get-crossref:
+  get-dimensions:
     runs-on: ubuntu-latest
     outputs:
       dois: ${{ steps.harvest.outputs.dois }}
@@ -29,7 +29,7 @@ jobs:
         run: python harvest.py dimensions -print >> $GITHUB_OUTPUT
   prepare-dois:
     name: Prepare Matrix Output of DOIs
-    needs: [get-crossref]
+    needs: [get-dimensions]
     runs-on: ubuntu-latest
     outputs: 
       dois: ${{ steps.step1.outputs.matrix }}

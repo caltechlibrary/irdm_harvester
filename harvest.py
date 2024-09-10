@@ -160,22 +160,23 @@ def get_dimensions():
     )
 
     publications = res.json["publications"]
-    caltech = False
-    for author in publication["authors"]:
-        for affiliation in author["affiliations"]:
-            if affiliation["id"] == "grid.20861.3d":
-                caltech_ind = True
-                if "91109" in affiliation["raw_affiliation"]:
+    for publication in publications:
+        caltech = False
+        for author in publication["authors"]:
+            for affiliation in author["affiliations"]:
+                if affiliation["id"] == "grid.20861.3d":
+                    caltech_ind = True
+                    if "91109" in affiliation["raw_affiliation"]:
+                        caltech_ind = False
+                    if "Jet Propulsion Laboratory" in affiliation["raw_affiliation"]:
+                        caltech_ind = False
+                else:
                     caltech_ind = False
-                if "Jet Propulsion Laboratory" in affiliation["raw_affiliation"]:
-                    caltech_ind = False
-            else:
-                caltech_ind = False
-        if caltech_ind:
-            caltech = True
-    if caltech:
-        if "doi" in publication:
-            dois.append(publication["doi"])
+            if caltech_ind:
+                caltech = True
+        if caltech:
+            if "doi" in publication:
+                dois.append(publication["doi"])
 
     return dois
 
