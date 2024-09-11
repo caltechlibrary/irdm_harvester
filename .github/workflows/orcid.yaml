@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       dois: ${{ steps.harvest.outputs.dois }}
+      message: ${{ steps.harvest.outputs.message }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -40,7 +41,7 @@ jobs:
         id: step1
   harvest:
     runs-on: ubuntu-latest
-    needs: [prepare-dois]
+    needs: [prepare-dois, get-orcid]
     continue-on-error: true
     strategy:
       fail-fast: false
@@ -68,7 +69,7 @@ jobs:
         env:
             RDMTOK: ${{ secrets.RDMTOK }}
         id: harvest
-        run: python harvest.py doi -doi "${{matrix.doi}}" -actor ${{github.actor}} >> $GITHUB_OUTPUT
+        run: python harvest.py doi -doi "${{matrix.doi}}" -actor ${{github.actor}} -message "${{needs.get-orcid.outputs.message}}" >> $GITHUB_OUTPUT
       - uses: cloudposse/github-action-matrix-outputs-write@main
         id: out
         with:
