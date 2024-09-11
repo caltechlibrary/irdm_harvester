@@ -8,6 +8,6 @@ errors = result["error"]
 for error in errors.keys():
     e = errors[error]
     if e:
-        if "system" in e:
+        if "system error" in e:
             print(e)
             exit(1)
