@@ -244,6 +244,7 @@ if __name__ == "__main__":
     parser.add_argument("-orcid", help="ORCID ID to harvest from")
     parser.add_argument("-doi", help="DOI to harvest")
     parser.add_argument("-actor", help="Name of actor to use for review message")
+    parser.add_argument("-message", help="Message to use in submission comment")
     parser.add_argument("-report", help="Generate a report only", action="store_true")
     parser.add_argument(
         "-print", help="Print out DOIs (no harvesting)", action="store_true"
@@ -262,38 +263,51 @@ if __name__ == "__main__":
 
     if harvest_type == "crossref":
         dois = get_crossref_ror()
-        review_message = (
-            "Automatically added from Crossref based on Caltech ROR affiliation"
-        )
+        if args.message:
+            review_message = args.message
+        else:
+            review_message = (
+                "Automatically added from Crossref based on Caltech ROR affiliation"
+            )
         if args.print:
             ostring = "dois="
             for doi in dois:
                 ostring += f" {doi}"
             print(ostring)
+            print(f"message= {review_message}")
             dois = []
     elif harvest_type == "dimensions":
         dois = get_dimensions()
-        review_message = "Automatically added from Crossref based on Caltech affiliation in Dimensions"
+        if args.message:
+            review_message = args.message
+        else:
+            review_message = "Automatically added from Crossref based on Caltech affiliation in Dimensions"
         if args.print:
             ostring = "dois="
             for doi in dois:
                 ostring += f" {doi}"
             print(ostring)
+            print(f"message= {review_message}")
             dois = []
     elif harvest_type == "orcid":
         dois = get_orcid_works(args.orcid)
-        review_message = (
-            f"Automatically added from ORCID from record {args.orcid} by {args.actor}"
-        )
+        if args.message:
+            review_message = args.message
+        else:
+            review_message = f"Automatically added from ORCID from record {args.orcid} by {args.actor}"
         if args.print:
             ostring = "dois= "
             for doi in dois:
                 ostring += f" {doi}"
             print(ostring)
+            print(f"message= {review_message}")
             dois = []
     elif harvest_type == "doi":
         dois = args.doi.split(" ")
-        review_message = f"Automatically added by {args.actor} as part of import from DOI list: {args.doi}"
+        if args.message:
+            review_message = args.message
+        else:
+            review_message = f"Automatically added by {args.actor} as part of import from DOI list: {args.doi}"
     elif harvest_type == "wos":
         dois = get_wos_dois("2M")
         new_dois = []
