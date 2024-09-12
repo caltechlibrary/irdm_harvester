@@ -51,6 +51,7 @@ jobs:
         shell: bash
         env:
             RDMTOK: ${{ secrets.RDMTOK }}
+            DIMKEY: ${{ secrets.DIMKEY }}
         id: harvest
         run: python harvest.py doi -doi "${{matrix.doi}}" -actor ${{github.actor}} >> $GITHUB_OUTPUT
       - uses: cloudposse/github-action-matrix-outputs-write@main
