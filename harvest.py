@@ -363,9 +363,9 @@ if __name__ == "__main__":
         if args.message:
             review_message = args.message
         else:
-            review_message = f"Automatically added by {args.actor} as part of
+            review_message = f"""Automatically added by {args.actor} as part of
             import from DOI list with affiliation and ORCID data enhanced by
-            Dimensions: {args.doi}"
+            Dimensions: {args.doi}"""
     elif harvest_type == "wos":
         dois = get_wos_dois("2M")
         new_dois = []
