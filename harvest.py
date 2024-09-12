@@ -61,7 +61,7 @@ def add_dimensions_metadata(metadata, doi):
             author = existing_authors[position]["person_or_org"]
             dimensions_author = dimensions_authors[position]
             if "identifiers" not in author:
-                if orcid in dimensions_author:
+                if "orcid" in dimensions_author:
                     author["identifiers"] = [
                         {"scheme": "orcid", "identifier": dimensions_author["orcid"][0]}
                     ]
