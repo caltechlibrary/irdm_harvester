@@ -75,7 +75,7 @@ def add_dimensions_metadata(metadata, doi):
                         if "raw_affiliation" in affiliation:
                             affil["name"] = affiliation["raw_affiliation"]
                         affiliations.append(affil)
-                    author["affiliations"] = affiliations
+                    existing_authors[position]["affiliations"] = affiliations
     return metadata
 
 
@@ -421,6 +421,8 @@ if __name__ == "__main__":
                 try:
                     data = add_dimensions_metadata(data, doi)
                     data, files = cleanup_metadata(data)
+                    print(data)
+                    exit()
                     response = caltechdata_write(
                         data,
                         token,
