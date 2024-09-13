@@ -421,8 +421,6 @@ if __name__ == "__main__":
                 try:
                     data = add_dimensions_metadata(data, doi)
                     data, files = cleanup_metadata(data)
-                    print(data)
-                    exit()
                     response = caltechdata_write(
                         data,
                         token,
