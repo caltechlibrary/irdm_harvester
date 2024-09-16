@@ -304,10 +304,12 @@ def check_record(data, review_message):
     title = data["metadata"]["title"]
     result = requests.get(
         f'https://authors.library.caltech.edu/api/records?q=metadata.title:"{title}"'
-    ).json()
-    if result["hits"]["total"] > 0:
-        link = result["hits"]["hits"][0]["links"]["self_html"]
-        review_message += f"\n  *** Duplicate title found: {link}"
+    )
+    if result.status_code == 200:
+        result = result.json()
+        if result["hits"]["total"] > 0:
+            link = result["hits"]["hits"][0]["links"]["self_html"]
+            review_message += f"\n  *** Duplicate title found: {link}"
     return review_message
 
 
