@@ -64,7 +64,7 @@ def add_dimensions_metadata(metadata, doi, review_message):
                 if dimensions_author["orcid"] not in [[], None]:
                     review_message = (
                         review_message
-                        + f"\n ORCID added from Dimensions: {dimensions_author['orcid'][0]}"
+                        + f"\n\n ORCID added from Dimensions: {dimensions_author['orcid'][0]}"
                     )
                     author["identifiers"] = [
                         {"scheme": "orcid", "identifier": dimensions_author["orcid"][0]}
@@ -75,7 +75,7 @@ def add_dimensions_metadata(metadata, doi, review_message):
                     for affiliation in dimensions_author["affiliations"]:
                         review_message = (
                             review_message
-                            + f"\n Affiliation added from Dimensions based on raw data: {affiliation['raw_affiliation']}"
+                            + f"\n\n Affiliation added from Dimensions based on raw data: {affiliation['raw_affiliation']}"
                         )
                         affil = {}
                         if "id" in affiliation:
@@ -311,7 +311,7 @@ def check_record(data, review_message):
             possible_match = result["hits"]["hits"][0]
             if possible_match["metadata"]["title"] == title:
                 link = possible_match["links"]["self_html"]
-                review_message += f"\n  *** Duplicate title found: {link}"
+                review_message += f"\n\n  *** Duplicate title found: {link}"
     return review_message
 
 
