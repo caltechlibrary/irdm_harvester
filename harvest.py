@@ -41,7 +41,7 @@ def match_orcid(creator, orcid):
             person["identifiers"] = result["identifiers"]
 
 
-def add_dimensions_metadata(metadata, doi):
+def add_dimensions_metadata(metadata, doi, review_message):
     dimkey = os.getenv("DIMKEY")
     endpoint = "https://cris-api.dimensions.ai/v3"
     dimcli.login(key=dimkey, endpoint=endpoint, verbose=False)
@@ -62,6 +62,10 @@ def add_dimensions_metadata(metadata, doi):
             dimensions_author = dimensions_authors[position]
             if "identifiers" not in author:
                 if dimensions_author["orcid"] not in [[], None]:
+                    review_message = (
+                        review_message
+                        + f"\n ORCID added from Dimensions: {dimensions_author['orcid'][0]}"
+                    )
                     author["identifiers"] = [
                         {"scheme": "orcid", "identifier": dimensions_author["orcid"][0]}
                     ]
@@ -69,6 +73,10 @@ def add_dimensions_metadata(metadata, doi):
                 affiliations = []
                 if dimensions_author["affiliations"] not in [[], None]:
                     for affiliation in dimensions_author["affiliations"]:
+                        review_message = (
+                            review_message
+                            + f"\n Affiliation added from Dimensions based on raw data: {affiliation['raw_affiliation']}"
+                        )
                         affil = {}
                         if "id" in affiliation:
                             affil["id"] = grid_to_ror(affiliation["id"])
@@ -76,7 +84,7 @@ def add_dimensions_metadata(metadata, doi):
                             affil["name"] = affiliation["raw_affiliation"]
                         affiliations.append(affil)
                     existing_authors[position]["affiliations"] = affiliations
-    return metadata
+    return metadata, review_message
 
 
 def cleanup_metadata(metadata):
@@ -292,6 +300,17 @@ def read_outputs():
     return dois, new_dois, existing_dois, arxiv_dois
 
 
+def check_record(data, review_message):
+    title = data["metadata"]["title"]
+    result = requests.get(
+        f'https://authors.library.caltech.edu/api/records?q=metadata.title:"{title}"'
+    ).json()
+    if result["hits"]["total"] > 0:
+        link = result["hits"]["hits"][0]["links"]["self_html"]
+        review_message += f"\n  *** Duplicate title found: {link}"
+    return review_message
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Harvest DOIs from Crossref or ORCID and add to CaltechAUTHORS"
@@ -364,8 +383,7 @@ if __name__ == "__main__":
             review_message = args.message
         else:
             review_message = f"""Automatically added by {args.actor} as part of
-            import from DOI list with affiliation and ORCID data enhanced by
-            Dimensions: {args.doi}"""
+            import from DOI list: {args.doi}"""
     elif harvest_type == "wos":
         dois = get_wos_dois("2M")
         new_dois = []
@@ -419,8 +437,11 @@ if __name__ == "__main__":
                     )
                     print(f"error= system error with doi2rdm {cleaned}")
                 try:
-                    data = add_dimensions_metadata(data, doi)
+                    data, review_message = add_dimensions_metadata(
+                        data, doi, review_message
+                    )
                     data, files = cleanup_metadata(data)
+                    review_message = check_record(data, review_message)
                     response = caltechdata_write(
                         data,
                         token,
