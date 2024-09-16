@@ -11,6 +11,24 @@ from wos import get_wos_dois
 from traceback import format_exc
 
 
+def grid_to_ror(grid):
+    if grid == "grid.451078.f":
+        ror = "00hm6j694"
+    elif grid == "grid.5805.8":
+        ror = "02en5vm52"
+    elif grid == "grid.465477.3":
+        ror = "00em52312"
+    else:
+        url = f"https://api.ror.org/organizations?query.advanced=external_ids.GRID.all:{grid}"
+        results = requests.get(url).json()
+        if len(results["items"]) == 0:
+            print(url + "doesn't have a valid ROR")
+            exit()
+        ror = results["items"][0]["id"]
+        ror = ror.split("ror.org/")[1]
+    return ror
+
+
 def match_orcid(creator, orcid):
     person = creator["person_or_org"]
     url = f"https://authors.library.caltech.edu/api/names?q=identifiers.identifier:{orcid}"
@@ -21,6 +39,52 @@ def match_orcid(creator, orcid):
             result = results[0]
             creator["affiliations"] = result["affiliations"]
             person["identifiers"] = result["identifiers"]
+
+
+def add_dimensions_metadata(metadata, doi, review_message):
+    dimkey = os.getenv("DIMKEY")
+    endpoint = "https://cris-api.dimensions.ai/v3"
+    dimcli.login(key=dimkey, endpoint=endpoint, verbose=False)
+    dsl = dimcli.Dsl()
+    res = dsl.query_iterative(
+        f"""
+        search publications
+        where doi = "{doi}"
+        return publications[basics+extras] """,
+        verbose=False,
+    )
+    publication = res.json["publications"][0]
+    dimensions_authors = publication["authors"]
+    existing_authors = metadata["metadata"]["creators"]
+    if len(dimensions_authors) == len(existing_authors):
+        for position in range(len(dimensions_authors)):
+            author = existing_authors[position]["person_or_org"]
+            dimensions_author = dimensions_authors[position]
+            if "identifiers" not in author:
+                if dimensions_author["orcid"] not in [[], None]:
+                    review_message = (
+                        review_message
+                        + f"\n\n ORCID added from Dimensions: {dimensions_author['orcid'][0]}"
+                    )
+                    author["identifiers"] = [
+                        {"scheme": "orcid", "identifier": dimensions_author["orcid"][0]}
+                    ]
+            if "affiliations" not in author:
+                affiliations = []
+                if dimensions_author["affiliations"] not in [[], None]:
+                    for affiliation in dimensions_author["affiliations"]:
+                        review_message = (
+                            review_message
+                            + f"\n\n Affiliation added from Dimensions based on raw data: {affiliation['raw_affiliation']}"
+                        )
+                        affil = {}
+                        if "id" in affiliation:
+                            affil["id"] = grid_to_ror(affiliation["id"])
+                        if "raw_affiliation" in affiliation:
+                            affil["name"] = affiliation["raw_affiliation"]
+                        affiliations.append(affil)
+                    existing_authors[position]["affiliations"] = affiliations
+    return metadata, review_message
 
 
 def cleanup_metadata(metadata):
@@ -236,6 +300,21 @@ def read_outputs():
     return dois, new_dois, existing_dois, arxiv_dois
 
 
+def check_record(data, review_message):
+    title = data["metadata"]["title"]
+    result = requests.get(
+        f'https://authors.library.caltech.edu/api/records?q=metadata.title:"{title}"'
+    )
+    if result.status_code == 200:
+        result = result.json()
+        if result["hits"]["total"] > 0:
+            possible_match = result["hits"]["hits"][0]
+            if possible_match["metadata"]["title"] == title:
+                link = possible_match["links"]["self_html"]
+                review_message += f"\n\n  *** Duplicate title found: {link}"
+    return review_message
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Harvest DOIs from Crossref or ORCID and add to CaltechAUTHORS"
@@ -307,7 +386,8 @@ if __name__ == "__main__":
         if args.message:
             review_message = args.message
         else:
-            review_message = f"Automatically added by {args.actor} as part of import from DOI list: {args.doi}"
+            review_message = f"""Automatically added by {args.actor} as part of
+            import from DOI list: {args.doi}"""
     elif harvest_type == "wos":
         dois = get_wos_dois("2M")
         new_dois = []
@@ -361,7 +441,11 @@ if __name__ == "__main__":
                     )
                     print(f"error= system error with doi2rdm {cleaned}")
                 try:
+                    data, review_message = add_dimensions_metadata(
+                        data, doi, review_message
+                    )
                     data, files = cleanup_metadata(data)
+                    review_message = check_record(data, review_message)
                     response = caltechdata_write(
                         data,
                         token,
