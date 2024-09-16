@@ -308,8 +308,10 @@ def check_record(data, review_message):
     if result.status_code == 200:
         result = result.json()
         if result["hits"]["total"] > 0:
-            link = result["hits"]["hits"][0]["links"]["self_html"]
-            review_message += f"\n  *** Duplicate title found: {link}"
+            possible_match = result["hits"]["hits"][0]
+            if possible_match["metadata"]["title"] == title:
+                link = possible_match["links"]["self_html"]
+                review_message += f"\n  *** Duplicate title found: {link}"
     return review_message
 
 
