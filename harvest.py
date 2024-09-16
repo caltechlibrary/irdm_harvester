@@ -56,6 +56,7 @@ def add_dimensions_metadata(metadata, doi, review_message):
     publication = res.json["publications"][0]
     dimensions_authors = publication["authors"]
     existing_authors = metadata["metadata"]["creators"]
+    aff_tag = False
     if len(dimensions_authors) == len(existing_authors):
         for position in range(len(dimensions_authors)):
             author = existing_authors[position]["person_or_org"]
@@ -73,6 +74,7 @@ def add_dimensions_metadata(metadata, doi, review_message):
                 affiliations = []
                 if dimensions_author["affiliations"] not in [[], None]:
                     for affiliation in dimensions_author["affiliations"]:
+                        aff_tag = True
                         review_message = (
                             review_message
                             + f"\n\n Affiliation added from Dimensions based on raw data: {affiliation['raw_affiliation']}"
@@ -84,6 +86,8 @@ def add_dimensions_metadata(metadata, doi, review_message):
                             affil["name"] = affiliation["raw_affiliation"]
                         affiliations.append(affil)
                     existing_authors[position]["affiliations"] = affiliations
+    if aff_tag:
+        review_message = review_message + f"\n\n Affiliations added from Dimensions"
     return metadata, review_message
 
 
