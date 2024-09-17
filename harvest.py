@@ -22,10 +22,10 @@ def grid_to_ror(grid):
         url = f"https://api.ror.org/organizations?query.advanced=external_ids.GRID.all:{grid}"
         results = requests.get(url).json()
         if len(results["items"]) == 0:
-            print(url + "doesn't have a valid ROR")
-            exit()
-        ror = results["items"][0]["id"]
-        ror = ror.split("ror.org/")[1]
+            ror=None
+        else:
+            ror = results["items"][0]["id"]
+            ror = ror.split("ror.org/")[1]
     return ror
 
 
@@ -81,7 +81,10 @@ def add_dimensions_metadata(metadata, doi, review_message):
                         )
                         affil = {}
                         if "id" in affiliation:
-                            affil["id"] = grid_to_ror(affiliation["id"])
+                            if affiliation["id"] is not None:
+                                ror = grid_to_ror(affiliation["id"])
+                                if ror is not None:
+                                    affil["id"] = ror
                         if "raw_affiliation" in affiliation:
                             affil["name"] = affiliation["raw_affiliation"]
                         affiliations.append(affil)
