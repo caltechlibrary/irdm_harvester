@@ -123,6 +123,8 @@ def cleanup_metadata(metadata):
                     response = requests.get(f'https://authors.library.caltech.edu/api/affiliations?q=id:{affiliation["id"]}')
                     if response.json()["hits"]["total"] > 0:
                         clean_affiliations.append(affiliation)
+                else:
+                    clean_affiliations.append(affiliation)
             creator["affiliations"] = clean_affiliations
     if "custom_fields" not in metadata:
         metadata["custom_fields"] = {}
