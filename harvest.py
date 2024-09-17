@@ -115,6 +115,15 @@ def cleanup_metadata(metadata):
                     match_orcid(creator, orcid)
                     if orcid in groups_list:
                         groups.update(groups_list[orcid])
+        # We need to check affiliation identifiers until we can update authors
+        if "affiliations" in creator:
+            clean_affiliations = []
+            for affiliation in creator["affiliations"]:
+                if "id" in affiliation:
+                    response = requests.get(f'https://authors.library.caltech.edu/api/affiliations?q=id:{affiliation["id"]}')
+                    if response.json()["hits"]["total"] > 0:
+                        clean_affiliations.append(affiliation)
+            creator["affiliations"] = clean_affiliations
     if "custom_fields" not in metadata:
         metadata["custom_fields"] = {}
     if groups:
@@ -162,6 +171,9 @@ def cleanup_metadata(metadata):
     # Detailed dates aren't currently desired
     if "dates" in metadata["metadata"]:
         metadata["metadata"].pop("dates")
+    # We need to check affiliation identifiers until we can update authors
+    
+
     return metadata, files
 
 
