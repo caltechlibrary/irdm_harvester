@@ -22,7 +22,7 @@ def grid_to_ror(grid):
         url = f"https://api.ror.org/organizations?query.advanced=external_ids.GRID.all:{grid}"
         results = requests.get(url).json()
         if len(results["items"]) == 0:
-            ror=None
+            ror = None
         else:
             ror = results["items"][0]["id"]
             ror = ror.split("ror.org/")[1]
@@ -120,7 +120,9 @@ def cleanup_metadata(metadata):
             clean_affiliations = []
             for affiliation in creator["affiliations"]:
                 if "id" in affiliation:
-                    response = requests.get(f'https://authors.library.caltech.edu/api/affiliations?q=id:{affiliation["id"]}')
+                    response = requests.get(
+                        f'https://authors.library.caltech.edu/api/affiliations?q=id:{affiliation["id"]}'
+                    )
                     if response.json()["hits"]["total"] > 0:
                         clean_affiliations.append(affiliation)
                 else:
@@ -174,7 +176,6 @@ def cleanup_metadata(metadata):
     if "dates" in metadata["metadata"]:
         metadata["metadata"].pop("dates")
     # We need to check affiliation identifiers until we can update authors
-    
 
     return metadata, files
 
