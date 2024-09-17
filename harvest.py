@@ -56,7 +56,6 @@ def add_dimensions_metadata(metadata, doi, review_message):
     publication = res.json["publications"][0]
     dimensions_authors = publication["authors"]
     existing_authors = metadata["metadata"]["creators"]
-    aff_tag = False
     if len(dimensions_authors) == len(existing_authors):
         for position in range(len(dimensions_authors)):
             author = existing_authors[position]["person_or_org"]
@@ -74,7 +73,6 @@ def add_dimensions_metadata(metadata, doi, review_message):
                 affiliations = []
                 if dimensions_author["affiliations"] not in [[], None]:
                     for affiliation in dimensions_author["affiliations"]:
-                        aff_tag = True
                         review_message = (
                             review_message
                             + f"\n\n Affiliation added from Dimensions based on raw data: {affiliation['raw_affiliation']}"
@@ -86,11 +84,16 @@ def add_dimensions_metadata(metadata, doi, review_message):
                                 if ror is not None:
                                     affil["id"] = ror
                         if "raw_affiliation" in affiliation:
-                            affil["name"] = affiliation["raw_affiliation"]
+                            raw = affiliation["raw_affiliation"]
+                            affil["name"] = raw
+                            if "91109" in raw:
+                                affil["id"] = "027k65916"
+                            if "Jet Propulsion Laboratory" in raw:
+                                affil["id"] = "027k65916"
+                            if "JPL" in raw:
+                                affil["id"] = "027k65916"
                         affiliations.append(affil)
                     existing_authors[position]["affiliations"] = affiliations
-    if aff_tag:
-        review_message = review_message + f"\n\n Affiliations added from Dimensions"
     return metadata, review_message
 
 
@@ -175,7 +178,6 @@ def cleanup_metadata(metadata):
     # Detailed dates aren't currently desired
     if "dates" in metadata["metadata"]:
         metadata["metadata"].pop("dates")
-    # We need to check affiliation identifiers until we can update authors
 
     return metadata, files
 
@@ -256,6 +258,8 @@ def get_dimensions():
                     if "91109" in affiliation["raw_affiliation"]:
                         caltech_ind = False
                     if "Jet Propulsion Laboratory" in affiliation["raw_affiliation"]:
+                        caltech_ind = False
+                    if "JPL" in affiliation["raw_affiliation"]:
                         caltech_ind = False
                 else:
                     caltech_ind = False
