@@ -19,7 +19,6 @@ def grid_to_ror(grid):
     elif grid == "grid.465477.3":
         ror = "00em52312"
     else:
-        print(grid)
         url = f"https://api.ror.org/organizations?query.advanced=external_ids.GRID.all:{grid}"
         results = requests.get(url).json()
         if len(results["items"]) == 0:
