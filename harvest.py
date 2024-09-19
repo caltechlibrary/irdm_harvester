@@ -147,7 +147,7 @@ def cleanup_metadata(metadata):
         if "affiliations" in creator:
             if check_affil:
                 clean_affiliations = []
-                affil_ids = {}
+                affil_ids = []
                 #  We also need to check for duplicates, until supported in RDM
                 for affiliation in creator["affiliations"]:
                     if "id" in affiliation:
