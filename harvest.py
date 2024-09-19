@@ -147,13 +147,18 @@ def cleanup_metadata(metadata):
         if "affiliations" in creator:
             if check_affil:
                 clean_affiliations = []
+                affil_ids = {}
+                #  We also need to check for duplicates, until supported in RDM
                 for affiliation in creator["affiliations"]:
                     if "id" in affiliation:
-                        response = requests.get(
-                            f'https://authors.library.caltech.edu/api/affiliations?q=id:{affiliation["id"]}'
-                        )
-                        if response.json()["hits"]["total"] > 0:
-                            clean_affiliations.append(affiliation)
+                        idv = affiliation["id"]
+                        if idv not in affil_ids:
+                            response = requests.get(
+                                f"https://authors.library.caltech.edu/api/affiliations?q=id:{idv}"
+                            )
+                            if response.json()["hits"]["total"] > 0:
+                                clean_affiliations.append(affiliation)
+                                affil_ids.append(idv)
                     else:
                         clean_affiliations.append(affiliation)
                 creator["affiliations"] = clean_affiliations
