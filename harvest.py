@@ -19,6 +19,7 @@ def grid_to_ror(grid):
     elif grid == "grid.465477.3":
         ror = "00em52312"
     else:
+        print(grid)
         url = f"https://api.ror.org/organizations?query.advanced=external_ids.GRID.all:{grid}"
         results = requests.get(url).json()
         if len(results["items"]) == 0:
@@ -56,6 +57,11 @@ def add_dimensions_metadata(metadata, doi, review_message):
     publication = res.json["publications"][0]
     dimensions_authors = publication["authors"]
     existing_authors = metadata["metadata"]["creators"]
+    add_affil = True
+    if len(dimensions_authors) > 500:
+        # Skip affiliation if too many authors to avoid bashing ROR API
+        # Can go away once Dimensions has ROR
+        add_affil = False
     if len(dimensions_authors) == len(existing_authors):
         for position in range(len(dimensions_authors)):
             author = existing_authors[position]["person_or_org"]
@@ -80,9 +86,12 @@ def add_dimensions_metadata(metadata, doi, review_message):
                         affil = {}
                         if "id" in affiliation:
                             if affiliation["id"] is not None:
-                                ror = grid_to_ror(affiliation["id"])
-                                if ror is not None:
-                                    affil["id"] = ror
+                                if affiliation["id"] == "grid.20861.3d":
+                                    affil["id"] = "05dxps055"
+                                elif add_affil:
+                                    ror = grid_to_ror(affiliation["id"])
+                                    if ror is not None:
+                                        affil["id"] = ror
                         if "raw_affiliation" in affiliation:
                             raw = affiliation["raw_affiliation"]
                             affil["name"] = raw
@@ -109,28 +118,46 @@ def cleanup_metadata(metadata):
                 groups_list[row["ORCID"]].append(row["Tag"])
     # Match creators by ORCID
     groups = set()
+    check_affil = True
+    if len(metadata["metadata"]["creators"]) > 500:
+        # Skip affiliation checking if too many authors to avoid bashing
+        # Authors API
+        # Can go away once we can update authors with ROR
+        check_affil = False
     for creator in metadata["metadata"]["creators"]:
         person = creator["person_or_org"]
         if "identifiers" in person:
             for identifier in person["identifiers"]:
                 if identifier["scheme"] == "orcid":
                     orcid = identifier["identifier"]
-                    match_orcid(creator, orcid)
+                    if not check_affil:
+                        try:
+                            affiliations = creator["affiliations"]
+                            for aff in affiliations:
+                                ror_id = aff["id"]
+                                if ror_id == "05dxps055":
+                                    # We always match Caltech people
+                                    match_orcid(creator, orcid)
+                        except:
+                            pass
+                    else:
+                        match_orcid(creator, orcid)
                     if orcid in groups_list:
                         groups.update(groups_list[orcid])
         # We need to check affiliation identifiers until we can update authors
         if "affiliations" in creator:
-            clean_affiliations = []
-            for affiliation in creator["affiliations"]:
-                if "id" in affiliation:
-                    response = requests.get(
-                        f'https://authors.library.caltech.edu/api/affiliations?q=id:{affiliation["id"]}'
-                    )
-                    if response.json()["hits"]["total"] > 0:
+            if check_affil:
+                clean_affiliations = []
+                for affiliation in creator["affiliations"]:
+                    if "id" in affiliation:
+                        response = requests.get(
+                            f'https://authors.library.caltech.edu/api/affiliations?q=id:{affiliation["id"]}'
+                        )
+                        if response.json()["hits"]["total"] > 0:
+                            clean_affiliations.append(affiliation)
+                    else:
                         clean_affiliations.append(affiliation)
-                else:
-                    clean_affiliations.append(affiliation)
-            creator["affiliations"] = clean_affiliations
+                creator["affiliations"] = clean_affiliations
     if "custom_fields" not in metadata:
         metadata["custom_fields"] = {}
     if groups:
