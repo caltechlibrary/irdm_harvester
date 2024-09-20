@@ -53,7 +53,12 @@ def add_dimensions_metadata(metadata, doi, review_message):
         return publications[basics+extras] """,
         verbose=False,
     )
-    publication = res.json["publications"][0]
+    publication = res.json["publications"]
+    if len(publication) == 0:
+        # Not yet in dimensions
+        return metadata, review_message
+    else:
+        publication = publication[0]
     dimensions_authors = publication["authors"]
     existing_authors = metadata["metadata"]["creators"]
     add_affil = True
