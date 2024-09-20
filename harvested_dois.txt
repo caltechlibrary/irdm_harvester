@@ -2185,3 +2185,5 @@ https://doi.org/10.1016/j.newar.2024.101694
 10.1016/j.physletb.2024.138936
 10.1126/sciadv.ado6240
 10.1093/mnras/stae2143
+10.1103/physrevb.110.l121113
+10.1103/physrevc.110.035809
