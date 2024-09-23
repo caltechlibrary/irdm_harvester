@@ -504,7 +504,7 @@ if __name__ == "__main__":
                     data = json.loads(data)
                 except subprocess.CalledProcessError as e:
                     if e.returncode == 2:
-                        print(f"error=DOI {doi} not found in Crossref")
+                        print(f"error=DOI {doi} not found in Crossref or DataCite")
                     else:
                         cleaned = format_error(format_exc())
                         print(f"error= system error with doi2rdm {cleaned}")

@@ -72,6 +72,11 @@ jobs:
         run: |
           echo ${{steps.harvest.outputs.error}}
           false
+      - name: DOI not yet in Crossref or DataCite
+        if: contains(steps.harvest.outputs.error, 'not found')
+        run: |
+          echo ${{steps.harvest.outputs.error}}
+          false
   write-output:
     name: Write Output
     runs-on: ubuntu-latest
