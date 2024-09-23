@@ -362,6 +362,18 @@ def read_outputs():
     return dois, new_dois, existing_dois, arxiv_dois
 
 
+def format_error(e):
+    return (
+        e.replace("\n", "-")
+        .replace(":", "-")
+        .replace("'", "-")
+        .replace('"', "-")
+        .replace("=", "-")
+        .replace("(", "-")
+        .replace(")", "-")
+    )
+
+
 def check_record(data, review_message):
     title = data["metadata"]["title"]
     result = requests.get(
@@ -491,23 +503,25 @@ if __name__ == "__main__":
                     data = transformed.decode("utf-8")
                     data = json.loads(data)
                 except Exception as e:
-                    cleaned = (
-                        format_exc()
-                        .replace("\n", "-")
-                        .replace(":", "-")
-                        .replace("'", "-")
-                        .replace('"', "-")
-                        .replace("=", "-")
-                        .replace("(", "-")
-                        .replace(")", "-")
-                    )
+                    cleaned = format_error(format_exc())
                     print(f"error= system error with doi2rdm {cleaned}")
+                    break
                 try:
                     data, review_message = add_dimensions_metadata(
                         data, doi, review_message
                     )
+                except Exception as e:
+                    cleaned = format_error(format_exc())
+                    print(f"error= system error with Dimensions metadata {cleaned}")
+                    break
+                try:
                     data, files = cleanup_metadata(data)
                     review_message = check_record(data, review_message)
+                except Exception as e:
+                    cleaned = format_error(format_exc())
+                    print(f"error= system error with metadata cleanup {cleaned}")
+                    break
+                try:
                     response = caltechdata_write(
                         data,
                         token,
@@ -519,16 +533,7 @@ if __name__ == "__main__":
                     )
                     print("doi=", doi)
                 except Exception as e:
-                    cleaned = (
-                        format_exc()
-                        .replace("\n", "-")
-                        .replace(":", "-")
-                        .replace("'", "-")
-                        .replace('"', "-")
-                        .replace("=", "-")
-                        .replace("(", "-")
-                        .replace(")", "-")
-                    )
+                    cleaned = format_error(format_exc())
                     print(
                         f"error= system error with writing metadata to CaltechAUTHORS {cleaned}"
                     )
