@@ -502,9 +502,12 @@ if __name__ == "__main__":
                     )
                     data = transformed.decode("utf-8")
                     data = json.loads(data)
-                except Exception as e:
-                    cleaned = format_error(format_exc())
-                    print(f"error= system error with doi2rdm {cleaned}")
+                except subprocess.CalledProcessError as e:
+                    if e.returncode == 2:
+                        print(f"error=DOI {doi} not found in Crossref")
+                    else:
+                        cleaned = format_error(format_exc())
+                        print(f"error= system error with doi2rdm {cleaned}")
                     break
                 try:
                     data, review_message = add_dimensions_metadata(
