@@ -37,7 +37,10 @@ def match_orcid(creator, orcid):
         results = response.json()["hits"]["hits"]
         if len(results) == 1:
             result = results[0]
-            creator["affiliations"] = result["affiliations"]
+            if "affiliations" not in creator: 
+                creator["affiliations"] = result["affiliations"]
+            if creator["affiliations"] == []:
+                creator["affiliations"] = result["affiliations"]
             person["identifiers"] = result["identifiers"]
 
 
