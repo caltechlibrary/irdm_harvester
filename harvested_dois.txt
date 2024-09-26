@@ -2219,3 +2219,4 @@ https://doi.org/10.1016/j.newar.2024.101694
 10.5194/egusphere-2024-2578
 10.1103/physrevlett.133.131401
 10.1103/physrevlett.133.136702
+10.1103/physrevd.110.063557
