@@ -37,7 +37,7 @@ def match_orcid(creator, orcid):
         results = response.json()["hits"]["hits"]
         if len(results) == 1:
             result = results[0]
-            if "affiliations" not in creator: 
+            if "affiliations" not in creator:
                 creator["affiliations"] = result["affiliations"]
             if creator["affiliations"] == []:
                 creator["affiliations"] = result["affiliations"]
@@ -71,8 +71,10 @@ def add_dimensions_metadata(metadata, doi, review_message):
         add_affil = False
     author_mismatch_is_ok = False
     if len(dimensions_authors) + 1 == len(existing_authors):
-        review_message = review_message + "\n\n !!! One Crossref author is
-        missing (probably a collaboration name)"
+        review_message = (
+            review_message
+            + "\n\n !!! One Crossref author is missing (probably a collaboration name)"
+        )
         author_mismatch_is_ok = True
     if len(dimensions_authors) == len(existing_authors) or author_mismatch_is_ok:
         for position in range(len(dimensions_authors)):
