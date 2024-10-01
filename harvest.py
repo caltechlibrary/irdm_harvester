@@ -69,7 +69,12 @@ def add_dimensions_metadata(metadata, doi, review_message):
         # Skip affiliation if too many authors to avoid bashing ROR API
         # Can go away once Dimensions has ROR
         add_affil = False
-    if len(dimensions_authors) == len(existing_authors):
+    author_mismatch_is_ok = False
+    if len(dimensions_authors) + 1 == len(existing_authors):
+        review_message = review_message + "\n\n !!! One Crossref author is
+        missing (probably a collaboration name)"
+        author_mismatch_is_ok = True
+    if len(dimensions_authors) == len(existing_authors) or author_mismatch_is_ok:
         for position in range(len(dimensions_authors)):
             author = existing_authors[position]["person_or_org"]
             dimensions_author = dimensions_authors[position]
