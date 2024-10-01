@@ -70,10 +70,12 @@ def add_dimensions_metadata(metadata, doi, review_message):
         # Can go away once Dimensions has ROR
         add_affil = False
     author_mismatch_is_ok = False
-    if len(dimensions_authors) + 1 == len(existing_authors):
+    if len(dimensions_authors) < len(existing_authors):
         review_message = (
             review_message
-            + "\n\n !!! One Crossref author is missing (probably a collaboration name)"
+            + """\n\n !!! The Dimensions and CrossRef author count is off.
+            This is probably a collaboration name at the end, but please 
+            manually confirm the author affiliations are correct."""
         )
         author_mismatch_is_ok = True
     if len(dimensions_authors) == len(existing_authors) or author_mismatch_is_ok:
