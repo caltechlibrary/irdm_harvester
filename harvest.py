@@ -117,7 +117,8 @@ def add_dimensions_metadata(metadata, doi, review_message):
                                 affil["id"] = "027k65916"
                             if "JPL" in raw:
                                 affil["id"] = "027k65916"
-                        affiliations.append(affil)
+                        if affil not in affiliations:
+                            affiliations.append(affil)
                     existing_authors[position]["affiliations"] = affiliations
     return metadata, review_message
 
