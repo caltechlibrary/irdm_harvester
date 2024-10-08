@@ -2288,4 +2288,3 @@ https://doi.org/10.1016/j.newar.2024.101694
 10.1103/physrevx.14.041005
 10.1103/physrevmaterials.8.104602
 10.1103/physrevb.110.155110
-10.1103/physrevlett.129.011801
