@@ -73,9 +73,9 @@ def add_dimensions_metadata(metadata, doi, review_message):
     if len(dimensions_authors) < len(existing_authors):
         review_message = (
             review_message
-            + """\n\n !!! The Dimensions and CrossRef author count is off.
+            + """\n\n ⚠⚠⚠ The Dimensions and CrossRef author count is off.
             This is probably a collaboration name at the end, but please 
-            manually confirm the author affiliations are correct."""
+            manually confirm the author affiliations are correct. ⚠⚠⚠ """
         )
         author_mismatch_is_ok = True
     if len(dimensions_authors) == len(existing_authors) or author_mismatch_is_ok:
