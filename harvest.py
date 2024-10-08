@@ -443,7 +443,7 @@ if __name__ == "__main__":
             review_message = args.message
         else:
             review_message = (
-                "Automatically added from Crossref based on Caltech ROR affiliation"
+                "Automatically added from Crossref based on Caltech ROR affiliation."
             )
         if args.print:
             ostring = "dois="
@@ -457,7 +457,7 @@ if __name__ == "__main__":
         if args.message:
             review_message = args.message
         else:
-            review_message = "Automatically added from Crossref based on Caltech affiliation in Dimensions"
+            review_message = "Automatically added from Dimensions Caltech affiliation harvest with metadata from Crossref."
         if args.print:
             ostring = "dois="
             for doi in dois:
