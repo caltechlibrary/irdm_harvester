@@ -75,7 +75,7 @@ def add_dimensions_metadata(metadata, doi, review_message):
             review_message
             + """ ⚠️⚠️⚠️  The Dimensions and CrossRef author count is off.
             This is probably a collaboration name at the end, but please 
-            manually confirm the author affiliations are correct. ❗❗❗"""
+            manually confirm the author affiliations are correct."""
         )
         author_mismatch_is_ok = True
     if len(dimensions_authors) == len(existing_authors) or author_mismatch_is_ok:
@@ -398,7 +398,17 @@ def check_record(data, review_message):
             possible_match = result["hits"]["hits"][0]
             if possible_match["metadata"]["title"] == title:
                 link = possible_match["links"]["self_html"]
-                review_message += f"\n\n  *** Duplicate title found: {link}"
+                review_message += f"\n\n  ❗❗❗ Duplicate title found: {link}"
+    result = requests.get(
+        f'https://authors.library.caltech.edu/api/requests/?q=title:"{title}"'
+    )
+    if result.status_code == 200:
+        result = result.json()
+        if result["hits"]["total"] > 0:
+            possible_match = result["hits"]["hits"][0]
+            if possible_match["title"] == title:
+                link = possible_match["links"]["self_html"]
+                review_message += f"\n\n  ❗❗❗ Duplicate title found in queue: {link}"
     return review_message
 
 
