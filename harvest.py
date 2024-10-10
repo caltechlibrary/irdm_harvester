@@ -6,7 +6,7 @@ import requests
 import dimcli
 from idutils import normalize_doi
 from check_doi import check_doi
-from caltechdata_api import caltechdata_write
+from caltechdata_api import caltechdata_write, caltechdata_edit
 from wos import get_wos_dois
 from traceback import format_exc
 
@@ -387,7 +387,7 @@ def format_error(e):
     )
 
 
-def check_record(data, review_message):
+def check_record(data, review_message, token):
     title = data["metadata"]["title"]
     result = requests.get(
         f'https://authors.library.caltech.edu/api/records?q=metadata.title:"{title}"'
@@ -399,8 +399,10 @@ def check_record(data, review_message):
             if possible_match["metadata"]["title"] == title:
                 link = possible_match["links"]["self_html"]
                 review_message += f"\n\n  ❗❗❗ Duplicate title found: {link}"
+    headers = {"Authorization": f"Bearer {token}"}
     result = requests.get(
-        f'https://authors.library.caltech.edu/api/requests/?q=title:"{title}"'
+        headers=headers,
+        url=f'https://authors.library.caltech.edu/api/requests/?q=title:"{title}"',
     )
     if result.status_code == 200:
         result = result.json()
@@ -416,9 +418,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Harvest DOIs from Crossref or ORCID and add to CaltechAUTHORS"
     )
-    parser.add_argument("harvest_type", help="crossref, orcid, doi, wos, dimensions")
+    parser.add_argument(
+        "harvest_type", help="crossref, orcid, doi, wos, dimensions, authors"
+    )
     parser.add_argument("-orcid", help="ORCID ID to harvest from")
     parser.add_argument("-doi", help="DOI to harvest")
+    parser.add_argument("-authors-source", help="Source record from authors")
+    parser.add_argument("-authors-destination", help="Destination record from authors")
     parser.add_argument("-actor", help="Name of actor to use for review message")
     parser.add_argument("-message", help="Message to use in submission comment")
     parser.add_argument("-report", help="Generate a report only", action="store_true")
@@ -452,6 +458,44 @@ if __name__ == "__main__":
             print(ostring)
             print(f"message= {review_message}")
             dois = []
+    elif harvest_type == "authors":
+        dois = []
+        if args.authors_source and args.authors_destination:
+            source = args.authors_source
+            destination = args.authors_destination
+            response = requests.get(
+                f"https://authors.library.caltech.edu/api/records/{source}"
+            )
+            if response.status_code == 200:
+                source_record = response.json()
+            else:
+                print(f"error=source record {source} not found")
+                exit()
+            response = requests.get(
+                f"https://authors.library.caltech.edu/api/records/{destination}"
+            )
+            if response.status_code == 200:
+                destination_record = response.json()
+            else:
+                print(f"error=destination record {destination} not found")
+                exit()
+            try:
+                response = caltechdata_edit(
+                    destination,
+                    source_record,
+                    token,
+                    production=True,
+                    authors=True,
+                    new_version=True,
+                )
+            except Exception as e:
+                cleaned = format_error(format_exc())
+                print(
+                    f"error= system error with writing metadata to CaltechAUTHORS {cleaned}"
+                )
+        else:
+            print(f"error=source and destination records must be provided")
+            exit()
     elif harvest_type == "dimensions":
         dois = get_dimensions()
         if args.message:
@@ -542,7 +586,7 @@ if __name__ == "__main__":
                     break
                 try:
                     data, files = cleanup_metadata(data)
-                    review_message = check_record(data, review_message)
+                    review_message = check_record(data, review_message, token)
                 except Exception as e:
                     cleaned = format_error(format_exc())
                     print(f"error= system error with metadata cleanup {cleaned}")
