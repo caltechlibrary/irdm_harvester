@@ -409,7 +409,9 @@ def check_record(data, review_message, token):
         if result["hits"]["total"] > 0:
             possible_match = result["hits"]["hits"][0]
             if possible_match["title"] == title:
-                link = possible_match["links"]["self_html"]
+                link_id = possible_match["id"]
+                # Needed because https://github.com/inveniosoftware/invenio-communities/issues/1228
+                link = f"https://authors.library.caltech.edu/communities/caltechauthors/requests/{link_id}"
                 review_message += f"\n\n  ❗❗❗ Duplicate title found in queue: {link}"
     return review_message
 
