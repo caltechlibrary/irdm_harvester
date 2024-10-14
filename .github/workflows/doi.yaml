@@ -8,7 +8,8 @@ on:
         required: true
       tag:
         description: '@ tag to include in submission for queue view'
-        required: false
+        required: true
+        default: 'new'
 
 jobs:
   prepare-dois:
@@ -56,7 +57,7 @@ jobs:
             RDMTOK: ${{ secrets.RDMTOK }}
             DIMKEY: ${{ secrets.DIMKEY }}
         id: harvest
-        run: python harvest.py doi -doi "${{matrix.doi}}" -actor ${{github.actor}} -tag ${{ github.events.inputs.tag }} >> $GITHUB_OUTPUT
+        run: python harvest.py doi -doi "${{matrix.doi}}" -actor ${{github.actor}} -tag ${{ github.event.inputs.tag }} >> $GITHUB_OUTPUT
       - uses: cloudposse/github-action-matrix-outputs-write@main
         id: out
         with:
