@@ -427,6 +427,7 @@ if __name__ == "__main__":
     parser.add_argument("-authors-destination", help="Destination record from authors")
     parser.add_argument("-actor", help="Name of actor to use for review message")
     parser.add_argument("-message", help="Message to use in submission comment")
+    parser.add_argument("-tag", help="Tag to use in submission comment")
     parser.add_argument("-report", help="Generate a report only", action="store_true")
     parser.add_argument(
         "-print", help="Print out DOIs (no harvesting)", action="store_true"
@@ -443,14 +444,23 @@ if __name__ == "__main__":
 
     community = "aedd135f-227e-4fdf-9476-5b3fd011bac6"
 
+    if args.tag:
+        if args.tag != "":
+            if args.tag[0] != "@":
+                tag = f"@{args.tag}"
+            else:
+                tag = args.tag
+        else:
+            tag = ""
+    else:
+        tag = ""
+
     if harvest_type == "crossref":
         dois = get_crossref_ror()
         if args.message:
             review_message = args.message
         else:
-            review_message = (
-                "Automatically added from Crossref based on Caltech ROR affiliation."
-            )
+            review_message = f"Automatically added from Crossref based on Caltech ROR affiliation. {tag}"
         if args.print:
             ostring = "dois="
             for doi in dois:
@@ -501,7 +511,7 @@ if __name__ == "__main__":
         if args.message:
             review_message = args.message
         else:
-            review_message = "Automatically added from Dimensions Caltech affiliation harvest with metadata from Crossref."
+            review_message = "Automatically added from Dimensions Caltech affiliation harvest with metadata from Crossref. {tag}"
         if args.print:
             ostring = "dois="
             for doi in dois:
@@ -514,7 +524,7 @@ if __name__ == "__main__":
         if args.message:
             review_message = args.message
         else:
-            review_message = f"Automatically added from ORCID from record {args.orcid} by {args.actor}"
+            review_message = f"Automatically added from ORCID from record {args.orcid} by {args.actor}. {tag}"
         if args.print:
             ostring = "dois= "
             for doi in dois:
@@ -528,7 +538,7 @@ if __name__ == "__main__":
             review_message = args.message
         else:
             review_message = f"""Automatically added by {args.actor} as part of
-            import from DOI list: {args.doi}"""
+            import from DOI list: {args.doi}. {tag}"""
     elif harvest_type == "wos":
         dois = get_wos_dois("2M")
         new_dois = []

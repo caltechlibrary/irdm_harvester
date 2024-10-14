@@ -6,6 +6,9 @@ on:
       orcid:
         description: 'ORCID identifier to harvest from'
         required: true
+      tag:
+        description: '@ tag to include in submission for queue view'
+        required: false
 
 
 jobs:
@@ -23,7 +26,7 @@ jobs:
       - name: Harvest DOIs
         shell: bash
         id: harvest
-        run: python harvest.py orcid -orcid ${{ github.event.inputs.orcid }} -actor ${{github.actor}} -print >> $GITHUB_OUTPUT
+        run: python harvest.py orcid -orcid ${{ github.event.inputs.orcid }} -tag ${{ github.events.inputs.tag }} -actor ${{github.actor}} -print >> $GITHUB_OUTPUT
   prepare-dois:
     name: Prepare Matrix Output of DOIs
     needs: [get-orcid]
