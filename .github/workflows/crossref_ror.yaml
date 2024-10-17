@@ -12,7 +12,7 @@ on:
 
 jobs:
   get-crossref:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       dois: ${{ steps.harvest.outputs.dois }}
       message: ${{ steps.harvest.outputs.message }}
