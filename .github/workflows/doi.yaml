@@ -14,7 +14,7 @@ on:
 jobs:
   prepare-dois:
     name: Prepare Matrix Output of DOIs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs: 
       dois: ${{ steps.step1.outputs.matrix }}
     env:
@@ -27,7 +27,7 @@ jobs:
         run: python split_doi.py >> $GITHUB_OUTPUT
         id: step1
   harvest:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [prepare-dois]
     continue-on-error: true
     strategy:
@@ -83,7 +83,7 @@ jobs:
           false
   write-output:
     name: Write Output
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [harvest]
     outputs:
       result: "${{ steps.read.outputs.result }}"
@@ -105,7 +105,7 @@ jobs:
           add: "['harvested_dois.txt']"
   report-status:
     name: Report Status
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [write-output]
     outputs:
       result: "${{ steps.read.outputs.result }}"
