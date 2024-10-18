@@ -34,7 +34,7 @@ jobs:
   prepare-dois:
     name: Prepare Matrix Output of DOIs
     needs: [get-crossref]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs: 
       dois: ${{ steps.step1.outputs.matrix }}
     env:
@@ -47,7 +47,7 @@ jobs:
         run: python split_doi.py >> $GITHUB_OUTPUT
         id: step1
   harvest:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [prepare-dois, get-crossref]
     continue-on-error: true
     strategy:
@@ -98,7 +98,7 @@ jobs:
           false
   write-output:
     name: Write Output
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [harvest]
     outputs:
       result: "${{ steps.read.outputs.result }}"
@@ -123,7 +123,7 @@ jobs:
           file_pattern: 'harvested_dois.txt'
   report-status:
     name: Report Status
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [write-output]
     outputs:
       result: "${{ steps.read.outputs.result }}"
