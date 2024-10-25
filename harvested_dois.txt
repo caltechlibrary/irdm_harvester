@@ -2366,3 +2366,8 @@ https://doi.org/10.1016/j.newar.2024.101694
 10.1126/science.adn4193
 10.1126/science.add5399
 10.1126/science.abn9033
+10.1103/physrevlett.133.071801
+10.1103/physrevlett.133.033003
+10.1103/physrevd.110.083525
+10.1103/physrevd.110.084035
+10.1103/physrevb.110.l041122
