@@ -658,7 +658,7 @@ mailto: helpdesk@library.caltech.edu
 resource_types:
   DataPaper: publication-datapaper
   Preprint: publication-preprint
-  text: publication-other
+  Text: publication-other
   article: publication-article
   book: publication-book
   book-chapter: publication-section
