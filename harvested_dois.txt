@@ -2579,3 +2579,15 @@ https://doi.org/10.1016/j.newar.2024.101694
 10.1093/nsr/nwae412
 10.1162/neco_a_01716
 10.1093/mnras/stae2576
+10.1093/mnras/stac2447
+10.1093/mnras/stac3726
+10.1093/mnras/stac2853
+10.1093/mnras/stac3810
+10.1093/mnras/stac3313
+10.1093/mnras/stac2938
+10.1093/mnras/stac2251
+10.1093/mnras/stac2218
+10.1093/mnras/stac1672
+10.1093/ptep/ptac093
+10.1093/mnras/stac2376
+10.1093/mnras/stac3245
