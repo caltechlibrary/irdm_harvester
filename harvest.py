@@ -53,7 +53,7 @@ def add_dimensions_metadata(metadata, doi, review_message):
         f"""
         search publications
         where doi = "{doi}"
-        return publications[basics+extras] """,
+        return publications[basics+extras+abstract] """,
         verbose=False,
     )
     publication = res.json["publications"]
@@ -62,6 +62,8 @@ def add_dimensions_metadata(metadata, doi, review_message):
         return metadata, review_message
     else:
         publication = publication[0]
+    if "description" not in metadata["metadata"]:
+        metadata["metadata"]["description"] = publication.get("abstract")
     dimensions_authors = publication["authors"]
     existing_authors = metadata["metadata"]["creators"]
     add_affil = True
@@ -434,6 +436,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-print", help="Print out DOIs (no harvesting)", action="store_true"
     )
+    parser.add_argument("-publish", help="Immediately publish records (does not go to requew queue)", action="store_true")
     args = parser.parse_args()
 
     harvest_type = args.harvest_type
@@ -604,6 +607,10 @@ if __name__ == "__main__":
                     print(f"error= system error with metadata cleanup {cleaned}")
                     break
                 try:
+                    if args.publish:
+                        publish = True
+                    else:
+                        publish = False
                     response = caltechdata_write(
                         data,
                         token,
@@ -612,6 +619,7 @@ if __name__ == "__main__":
                         community=community,
                         review_message=review_message,
                         files=files,
+                        publish=publish,
                     )
                     print("doi=", doi)
                 except Exception as e:
