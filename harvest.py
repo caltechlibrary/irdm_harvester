@@ -128,9 +128,11 @@ def add_dimensions_metadata(metadata, doi, review_message):
 def cleanup_metadata(metadata):
     # Read in groups list
     groups_list = {}
+    clpid_list = {}
     with open("group_tagging.csv") as infile:
         reader = csv.DictReader(infile)
         for row in reader:
+            clpid_list[row["ORCID"]] = row["CLPID"]
             if row["ORCID"] not in groups_list:
                 groups_list[row["ORCID"]] = [row["Tag"]]
             else:
@@ -145,8 +147,12 @@ def cleanup_metadata(metadata):
         check_affil = False
     for creator in metadata["metadata"]["creators"]:
         person = creator["person_or_org"]
+        clpid_needed = True
+        clpid = None
         if "identifiers" in person:
             for identifier in person["identifiers"]:
+                if identifier["scheme"] == "clpid":
+                    clipd_needed = False
                 if identifier["scheme"] == "orcid":
                     orcid = identifier["identifier"]
                     if not check_affil:
@@ -163,6 +169,20 @@ def cleanup_metadata(metadata):
                         match_orcid(creator, orcid)
                     if orcid in groups_list:
                         groups.update(groups_list[orcid])
+                    if orcid in clpid_list:
+                        clpid = clpid_list[orcid]
+        # Add clpid only if needed
+        if clpid_needed:
+            if clpid is not None:
+                if "identifiers" not in person:
+                    person["identifiers"] = []
+                person["identifiers"].append({"scheme": "clpid", "identifier": clpid})
+            elif person["family_name"] == "McMahon" and person["given_name"].startswith("A"):
+                if "identifiers" not in person:
+                    person["identifiers"] = []
+                person["identifiers"].append(
+                    {"scheme": "clpid", "identifier": "McMahon-Andrew-P"}
+                )
         # We need to check affiliation identifiers until we can update authors
         if "affiliations" in creator:
             if check_affil:
@@ -229,6 +249,9 @@ def cleanup_metadata(metadata):
     # Detailed dates aren't currently desired
     if "dates" in metadata["metadata"]:
         metadata["metadata"].pop("dates")
+    # Set some defaults
+    metadata["custom_fields"]["caltech:publication_status"]= [{"id": "published"}]
+    metadata["metadata"]["version"] = "Published"
 
     return metadata, files
 
