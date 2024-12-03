@@ -177,12 +177,6 @@ def cleanup_metadata(metadata):
                 if "identifiers" not in person:
                     person["identifiers"] = []
                 person["identifiers"].append({"scheme": "clpid", "identifier": clpid})
-            elif person["family_name"] == "McMahon" and person["given_name"].startswith("A"):
-                if "identifiers" not in person:
-                    person["identifiers"] = []
-                person["identifiers"].append(
-                    {"scheme": "clpid", "identifier": "McMahon-Andrew-P"}
-                )
         # We need to check affiliation identifiers until we can update authors
         if "affiliations" in creator:
             if check_affil:
@@ -456,6 +450,7 @@ if __name__ == "__main__":
     parser.add_argument("-message", help="Message to use in submission comment")
     parser.add_argument("-tag", help="Tag to use in submission comment")
     parser.add_argument("-report", help="Generate a report only", action="store_true")
+    parser.add_argument("-test", help="Test mode", action="store_true")
     parser.add_argument(
         "-print", help="Print out DOIs (no harvesting)", action="store_true"
     )
@@ -634,10 +629,14 @@ if __name__ == "__main__":
                         publish = True
                     else:
                         publish = False
+                    if args.test:
+                        production = False
+                    else:
+                        production = True
                     response = caltechdata_write(
                         data,
                         token,
-                        production=True,
+                        production=production,
                         authors=True,
                         community=community,
                         review_message=review_message,
