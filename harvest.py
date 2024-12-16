@@ -29,9 +29,13 @@ def grid_to_ror(grid):
     return ror
 
 
-def match_orcid(creator, orcid):
+def match_orcid(creator, orcid, production=True):
     person = creator["person_or_org"]
-    url = f"https://authors.library.caltech.edu/api/names?q=identifiers.identifier:{orcid}"
+    if production == False:
+        base_url = "https://authors.caltechlibrary.dev/"
+    else:
+        base_url = "https://authors.library.caltech.edu/"
+    url = f"{base_url}api/names?q=identifiers.identifier:{orcid}"
     response = requests.get(url)
     if response.status_code == 200:
         results = response.json()["hits"]["hits"]
@@ -125,7 +129,7 @@ def add_dimensions_metadata(metadata, doi, review_message):
     return metadata, review_message
 
 
-def cleanup_metadata(metadata):
+def cleanup_metadata(metadata,production=True):
     # Read in groups list
     groups_list = {}
     clpid_list = {}
@@ -162,11 +166,11 @@ def cleanup_metadata(metadata):
                                 ror_id = aff["id"]
                                 if ror_id == "05dxps055":
                                     # We always match Caltech people
-                                    match_orcid(creator, orcid)
+                                    match_orcid(creator, orcid,production)
                         except:
                             pass
                     else:
-                        match_orcid(creator, orcid)
+                        match_orcid(creator, orcid, production)
                     if orcid in groups_list:
                         groups.update(groups_list[orcid])
                     if orcid in clpid_list:
@@ -187,8 +191,12 @@ def cleanup_metadata(metadata):
                     if "id" in affiliation:
                         idv = affiliation["id"]
                         if idv not in affil_ids:
+                            if production == False:
+                                base_url = "https://authors.caltechlibrary.dev/"
+                            else:
+                                base_url = "https://authors.library.caltech.edu/"
                             response = requests.get(
-                                f"https://authors.library.caltech.edu/api/affiliations?q=id:{idv}"
+                                f"{base_url}api/affiliations?q=id:{idv}"
                             )
                             if response.json()["hits"]["total"] > 0:
                                 clean_affiliations.append(affiliation)
@@ -240,6 +248,13 @@ def cleanup_metadata(metadata):
     if rights == []:
         rights.append({"id": "default"})
     metadata["metadata"]["rights"] = rights
+    # The extra ISSN isn't needed
+    if "identifers" in metadata["metadata"]: 
+        identifiers = []
+        for identifier in metadata["metadata"]["identifiers"]:
+            if identifier["scheme"] != "issn":
+                identifiers.append(identifier)
+        metadata["metadata"]["identifiers"] = identifiers
     # Detailed dates aren't currently desired
     if "dates" in metadata["metadata"]:
         metadata["metadata"].pop("dates")
@@ -406,10 +421,14 @@ def format_error(e):
     )
 
 
-def check_record(data, review_message, token):
+def check_record(data, review_message, token, production=True):
     title = data["metadata"]["title"]
+    if production == False:
+        base_url = "https://authors.caltechlibrary.dev/"
+    else:
+        base_url = "https://authors.library.caltech.edu/"
     result = requests.get(
-        f'https://authors.library.caltech.edu/api/records?q=metadata.title:"{title}"'
+        f'{base_url}api/records?q=metadata.title:"{title}"'
     )
     if result.status_code == 200:
         result = result.json()
@@ -421,7 +440,7 @@ def check_record(data, review_message, token):
     headers = {"Authorization": f"Bearer {token}"}
     result = requests.get(
         headers=headers,
-        url=f'https://authors.library.caltech.edu/api/requests/?q=title:"{title}"',
+        url=f'{base_url}api/requests/?q=title:"{title}"',
     )
     if result.status_code == 200:
         result = result.json()
@@ -430,7 +449,7 @@ def check_record(data, review_message, token):
             if possible_match["title"] == title:
                 link_id = possible_match["id"]
                 # Needed because https://github.com/inveniosoftware/invenio-communities/issues/1228
-                link = f"https://authors.library.caltech.edu/communities/caltechauthors/requests/{link_id}"
+                link = f"{base_url}communities/caltechauthors/requests/{link_id}"
                 review_message += f"\n\n  ❗❗❗ Duplicate title found in queue: {link}"
     return review_message
 
@@ -457,6 +476,11 @@ if __name__ == "__main__":
     parser.add_argument("-publish", help="Immediately publish records (does not go to requew queue)", action="store_true")
     args = parser.parse_args()
 
+    if args.test:
+        production=False
+    else:
+        production=True
+
     harvest_type = args.harvest_type
 
     token = os.getenv("RDMTOK")
@@ -465,7 +489,10 @@ if __name__ == "__main__":
     with open("harvested_dois.txt") as infile:
         harvested_dois = infile.read().splitlines()
 
-    community = "aedd135f-227e-4fdf-9476-5b3fd011bac6"
+    if production:
+        community = "aedd135f-227e-4fdf-9476-5b3fd011bac6"
+    else:
+        community = "ab23cb28-94b9-42db-80e6-c6ed80faafd0"
 
     if args.tag:
         if args.tag != "":
@@ -493,11 +520,15 @@ if __name__ == "__main__":
             dois = []
     elif harvest_type == "authors":
         dois = []
+        if production == False:
+            base_url = "https://authors.caltechlibrary.dev/"
+        else:
+            base_url = "https://authors.library.caltech.edu"
         if args.authors_source and args.authors_destination:
             source = args.authors_source
             destination = args.authors_destination
             response = requests.get(
-                f"https://authors.library.caltech.edu/api/records/{source}"
+                f"{base_url}api/records/{source}"
             )
             if response.status_code == 200:
                 source_record = response.json()
@@ -505,7 +536,7 @@ if __name__ == "__main__":
                 print(f"error=source record {source} not found")
                 exit()
             response = requests.get(
-                f"https://authors.library.caltech.edu/api/records/{destination}"
+                f"{base_url}api/records/{destination}"
             )
             if response.status_code == 200:
                 destination_record = response.json()
@@ -517,7 +548,7 @@ if __name__ == "__main__":
                     destination,
                     source_record,
                     token,
-                    production=True,
+                    production=production,
                     authors=True,
                     new_version=True,
                 )
@@ -594,7 +625,7 @@ if __name__ == "__main__":
 
     for doi in dois:
         doi = normalize_doi(doi)
-        if not check_doi(doi, production=True, token=token):
+        if not check_doi(doi, production=production, token=token):
             if doi not in harvested_dois:
                 try:
                     transformed = subprocess.check_output(
@@ -619,7 +650,7 @@ if __name__ == "__main__":
                     break
                 try:
                     data, files = cleanup_metadata(data)
-                    review_message = check_record(data, review_message, token)
+                    review_message = check_record(data, review_message, token, production=production)
                 except Exception as e:
                     cleaned = format_error(format_exc())
                     print(f"error= system error with metadata cleanup {cleaned}")
@@ -629,10 +660,6 @@ if __name__ == "__main__":
                         publish = True
                     else:
                         publish = False
-                    if args.test:
-                        production = False
-                    else:
-                        production = True
                     response = caltechdata_write(
                         data,
                         token,
