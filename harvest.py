@@ -129,7 +129,7 @@ def add_dimensions_metadata(metadata, doi, review_message):
     return metadata, review_message
 
 
-def cleanup_metadata(metadata,production=True):
+def cleanup_metadata(metadata, production=True):
     # Read in groups list
     groups_list = {}
     clpid_list = {}
@@ -166,7 +166,7 @@ def cleanup_metadata(metadata,production=True):
                                 ror_id = aff["id"]
                                 if ror_id == "05dxps055":
                                     # We always match Caltech people
-                                    match_orcid(creator, orcid,production)
+                                    match_orcid(creator, orcid, production)
                         except:
                             pass
                     else:
@@ -249,7 +249,7 @@ def cleanup_metadata(metadata,production=True):
         rights.append({"id": "default"})
     metadata["metadata"]["rights"] = rights
     # The extra ISSN isn't needed
-    if "identifers" in metadata["metadata"]: 
+    if "identifiers" in metadata["metadata"]:
         identifiers = []
         for identifier in metadata["metadata"]["identifiers"]:
             if identifier["scheme"] != "issn":
@@ -259,7 +259,7 @@ def cleanup_metadata(metadata,production=True):
     if "dates" in metadata["metadata"]:
         metadata["metadata"].pop("dates")
     # Set some defaults
-    metadata["custom_fields"]["caltech:publication_status"]= [{"id": "published"}]
+    metadata["custom_fields"]["caltech:publication_status"] = [{"id": "published"}]
     metadata["metadata"]["version"] = "Published"
 
     return metadata, files
@@ -427,9 +427,7 @@ def check_record(data, review_message, token, production=True):
         base_url = "https://authors.caltechlibrary.dev/"
     else:
         base_url = "https://authors.library.caltech.edu/"
-    result = requests.get(
-        f'{base_url}api/records?q=metadata.title:"{title}"'
-    )
+    result = requests.get(f'{base_url}api/records?q=metadata.title:"{title}"')
     if result.status_code == 200:
         result = result.json()
         if result["hits"]["total"] > 0:
@@ -473,13 +471,17 @@ if __name__ == "__main__":
     parser.add_argument(
         "-print", help="Print out DOIs (no harvesting)", action="store_true"
     )
-    parser.add_argument("-publish", help="Immediately publish records (does not go to requew queue)", action="store_true")
+    parser.add_argument(
+        "-publish",
+        help="Immediately publish records (does not go to requew queue)",
+        action="store_true",
+    )
     args = parser.parse_args()
 
     if args.test:
-        production=False
+        production = False
     else:
-        production=True
+        production = True
 
     harvest_type = args.harvest_type
 
@@ -527,17 +529,13 @@ if __name__ == "__main__":
         if args.authors_source and args.authors_destination:
             source = args.authors_source
             destination = args.authors_destination
-            response = requests.get(
-                f"{base_url}api/records/{source}"
-            )
+            response = requests.get(f"{base_url}api/records/{source}")
             if response.status_code == 200:
                 source_record = response.json()
             else:
                 print(f"error=source record {source} not found")
                 exit()
-            response = requests.get(
-                f"{base_url}api/records/{destination}"
-            )
+            response = requests.get(f"{base_url}api/records/{destination}")
             if response.status_code == 200:
                 destination_record = response.json()
             else:
@@ -650,7 +648,9 @@ if __name__ == "__main__":
                     break
                 try:
                     data, files = cleanup_metadata(data)
-                    review_message = check_record(data, review_message, token, production=production)
+                    review_message = check_record(
+                        data, review_message, token, production=production
+                    )
                 except Exception as e:
                     cleaned = format_error(format_exc())
                     print(f"error= system error with metadata cleanup {cleaned}")
