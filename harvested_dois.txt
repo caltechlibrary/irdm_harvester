@@ -2876,3 +2876,4 @@ https://doi.org/10.1016/j.newar.2024.101694
 10.1103/prxquantum.5.040348
 10.1103/physrevd.110.124063
 10.1103/physrevx.14.041069
+10.1103/physrevlett.133.260404
