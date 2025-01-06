@@ -2895,3 +2895,16 @@ https://doi.org/10.1016/j.newar.2024.101694
 10.1103/physrevlett.134.011602
 10.7554/elife.91422
 10.7554/elife.91422.3
+https://doi.org/10.48550/arXiv.2412.05760
+https://doi.org/10.3847/2041-8213/ad785c
+https://doi.org/10.3847/2041-8213/ad7e1f
+https://doi.org/10.48550/arXiv.2410.06253
+https://doi.org/10.48550/arXiv.2409.09147
+https://doi.org/10.48550/arXiv.2410.10944
+https://doi.org/10.48550/arXiv.2410.23264
+https://doi.org/10.48550/arXiv.2404.01658
+https://doi.org/10.48550/arXiv.2406.02992
+https://doi.org/10.3847/2041-8213/acfdae
+https://doi.org/10.3847/1538-4357/ad9b87
+https://doi.org/10.48550/arXiv.2409.12359
+https://doi.org/10.3847/2041-8213/ad7713
