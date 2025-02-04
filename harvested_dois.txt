@@ -3107,3 +3107,5 @@ https://doi.org/10.1126/scirobotics.adp3593
 10.5194/amt-15-7353-2022
 10.1103/physrevd.111.036001
 https://doi.org/10.1016/j.jlp.2025.105568
+10.3847/PSJ/ad698a
+10.3847/PSJ/ad7468
