@@ -3146,3 +3146,4 @@ https://doi.org/10.1016/j.jlp.2025.105568
 10.1161/str.56.suppl_1.tp371
 10.1098/rsob.240325
 10.1016/j.physletb.2025.139296
+https://doi.org/10.1002/anie.202417598
