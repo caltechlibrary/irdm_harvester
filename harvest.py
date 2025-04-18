@@ -4,7 +4,7 @@ import datetime
 import subprocess
 import requests
 import dimcli
-from idutils import normalize_doi
+from idutils import normalize_doi, normalize_orcid
 from check_doi import check_doi
 from caltechdata_api import caltechdata_write, caltechdata_edit
 from wos import get_wos_dois
@@ -71,22 +71,29 @@ def add_dimensions_metadata(metadata, doi, review_message):
     dimensions_authors = publication["authors"]
     existing_authors = metadata["metadata"]["creators"]
     add_affil = True
-    if len(dimensions_authors) > 500:
-        # Skip affiliation if too many authors to avoid bashing ROR API
-        # Can go away once Dimensions has ROR
-        add_affil = False
+    # if len(dimensions_authors) > 500:
+    # Skip affiliation if too many authors to avoid bashing ROR API
+    # Can go away once Dimensions has ROR
+    #    add_affil = False
     author_mismatch_is_ok = False
+    position_in_crossref = 0
     if len(dimensions_authors) < len(existing_authors):
         review_message = (
             review_message
             + """ ⚠️⚠️⚠️  The Dimensions and CrossRef author count is off.
-            This is probably a collaboration name at the end, but please 
+            This is probably due to a collaboration name, but please 
             manually confirm the author affiliations are correct."""
         )
         author_mismatch_is_ok = True
+        # We want to check for the case where the first author is a
+        # collaboration. This isn't perfect, but it is a start.
+        dimensions_first_author = dimensions_authors[0].get("last_name")
+        existing_first_author = existing_authors[1]["person_or_org"].get("family_name")
+        if dimensions_first_author == existing_first_author:
+            position_in_crossref = 1
     if len(dimensions_authors) == len(existing_authors) or author_mismatch_is_ok:
         for position in range(len(dimensions_authors)):
-            author = existing_authors[position]["person_or_org"]
+            author = existing_authors[position_in_crossref]["person_or_org"]
             dimensions_author = dimensions_authors[position]
             if "identifiers" not in author:
                 if dimensions_author["orcid"] not in [[], None]:
@@ -97,7 +104,7 @@ def add_dimensions_metadata(metadata, doi, review_message):
                     author["identifiers"] = [
                         {"scheme": "orcid", "identifier": dimensions_author["orcid"][0]}
                     ]
-            if "affiliations" not in author:
+            if "affiliations" not in existing_authors[position_in_crossref]:
                 affiliations = []
                 if dimensions_author["affiliations"] not in [[], None]:
                     for affiliation in dimensions_author["affiliations"]:
@@ -125,30 +132,47 @@ def add_dimensions_metadata(metadata, doi, review_message):
                                 affil["id"] = "027k65916"
                         if affil not in affiliations:
                             affiliations.append(affil)
-                    existing_authors[position]["affiliations"] = affiliations
+                    existing_authors[position_in_crossref][
+                        "affiliations"
+                    ] = affiliations
+            position_in_crossref += 1
     return metadata, review_message
 
 
 def cleanup_metadata(metadata, production=True):
+    # Read in supported identitifiers - this will go away once we upgrade
+    # authors
+    with open("ror.txt") as infile:
+        lines = infile.readlines()
+        ror = [e.strip() for e in lines]
+
     # Read in groups list
     groups_list = {}
     clpid_list = {}
-    with open("group_tagging.csv") as infile:
-        reader = csv.DictReader(infile)
-        for row in reader:
-            clpid_list[row["ORCID"]] = row["CLPID"]
-            if row["ORCID"] not in groups_list:
-                groups_list[row["ORCID"]] = [row["Tag"]]
+    # Read in group list
+    group_url = "https://feeds.library.caltech.edu/rpt/group_people_crosswalk.csv"
+    with requests.get(group_url, stream=True) as r:
+        lines = (line.decode("utf-8") for line in r.iter_lines())
+        for row in csv.DictReader(lines):
+            clpid_list[row["orcid"]] = row["clpid"]
+            if row["orcid"] not in groups_list:
+                groups_list[row["orcid"]] = [row["tag"]]
             else:
-                groups_list[row["ORCID"]].append(row["Tag"])
+                groups_list[row["orcid"]].append(row["tag"])
+    # Read in people list
+    orcid_mapping = {}
+    people_url = "https://feeds.library.caltech.edu/people/people.csv"
+    with requests.get(people_url, stream=True) as r:
+        lines = (line.decode("utf-8") for line in r.iter_lines())
+        for row in csv.DictReader(lines):
+            if row["orcid"] != "":
+                orcid_mapping[row["orcid"]] = {
+                    "cl_people_id": row["cl_people_id"],
+                    "caltech": row["caltech"],
+                    "jpl": row["jpl"],
+                }
     # Match creators by ORCID
     groups = set()
-    check_affil = True
-    if len(metadata["metadata"]["creators"]) > 500:
-        # Skip affiliation checking if too many authors to avoid bashing
-        # Authors API
-        # Can go away once we can update authors with ROR
-        check_affil = False
     for creator in metadata["metadata"]["creators"]:
         person = creator["person_or_org"]
         clpid_needed = True
@@ -156,25 +180,16 @@ def cleanup_metadata(metadata, production=True):
         if "identifiers" in person:
             for identifier in person["identifiers"]:
                 if identifier["scheme"] == "clpid":
-                    clipd_needed = False
+                    clpid_needed = False
                 if identifier["scheme"] == "orcid":
-                    orcid = identifier["identifier"]
-                    if not check_affil:
-                        try:
-                            affiliations = creator["affiliations"]
-                            for aff in affiliations:
-                                ror_id = aff["id"]
-                                if ror_id == "05dxps055":
-                                    # We always match Caltech people
-                                    match_orcid(creator, orcid, production)
-                        except:
-                            pass
-                    else:
-                        match_orcid(creator, orcid, production)
-                    if orcid in groups_list:
-                        groups.update(groups_list[orcid])
-                    if orcid in clpid_list:
-                        clpid = clpid_list[orcid]
+                    orcid = normalize_orcid(identifier["identifier"])
+                    cold_data = orcid_mapping.get(orcid)
+                    if cold_data is not None:
+                        clpid = cold_data.get("cl_people_id")
+                        caltech = cold_data.get("caltech")
+                        jpl = cold_data.get("jpl")
+                        if orcid in groups_list:
+                            groups.update(groups_list[orcid])
         # Add clpid only if needed
         if clpid_needed:
             if clpid is not None:
@@ -183,27 +198,19 @@ def cleanup_metadata(metadata, production=True):
                 person["identifiers"].append({"scheme": "clpid", "identifier": clpid})
         # We need to check affiliation identifiers until we can update authors
         if "affiliations" in creator:
-            if check_affil:
-                clean_affiliations = []
-                affil_ids = []
-                #  We also need to check for duplicates, until supported in RDM
-                for affiliation in creator["affiliations"]:
-                    if "id" in affiliation:
-                        idv = affiliation["id"]
-                        if idv not in affil_ids:
-                            if production == False:
-                                base_url = "https://authors.caltechlibrary.dev/"
-                            else:
-                                base_url = "https://authors.library.caltech.edu/"
-                            response = requests.get(
-                                f"{base_url}api/affiliations?q=id:{idv}"
-                            )
-                            if response.json()["hits"]["total"] > 0:
-                                clean_affiliations.append(affiliation)
-                                affil_ids.append(idv)
-                    else:
-                        clean_affiliations.append(affiliation)
-                creator["affiliations"] = clean_affiliations
+            clean_affiliations = []
+            affil_ids = []
+            #  We also need to check for duplicates, until supported in RDM
+            for affiliation in creator["affiliations"]:
+                if "id" in affiliation:
+                    idv = affiliation["id"]
+                    if idv not in affil_ids:
+                        if idv in ror:
+                            clean_affiliations.append(affiliation)
+                            affil_ids.append(idv)
+                else:
+                    clean_affiliations.append(affiliation)
+            creator["affiliations"] = clean_affiliations
     if "custom_fields" not in metadata:
         metadata["custom_fields"] = {}
     if groups:
