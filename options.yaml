@@ -355,7 +355,6 @@ issn_journals:
   0022-3654: Journal of Physical Chemistry
   0027-8424: Proceedings of the National Academy of Sciences
   0028-0836: Nature
-  0035-2966: Monthly Notice of the Royal Astronomial Society
   0037-1106: Bulletin of the Seismological Society of America
   0037-1107: Bulletin of the Seismological Society of America
   0043-1397: Water Resources Research
@@ -384,7 +383,8 @@ issn_journals:
   1362-4326: Trends in Biochemical Sciences
   1362-4555: Trends in Genetics
   1365-246X: Geophysical Journal International
-  1365-2966: Monthly Notice of the Royal Astronomial Society
+  0035-8711: Monthly Notices of the Royal Astronomical Society
+  1365-2966: Monthly Notices of the Royal Astronomical Society
   1465-7392: Nature Cell Biology
   1471-003X: Nature Reviews Neuroscience
   1471-0048: Nature Reviews Neuroscience
@@ -441,8 +441,8 @@ issn_journals:
   1740-1534: Nature Reviews Microbiology
   1745-2473: Nature Physics
   1745-2481: Nature Physics
-  1745-3925: Monthly Notice of the Royal Astronomial Society Letters
-  1745-3933: Monthly Notice of the Royal Astronomial Society Letters
+  1745-3925: 'Monthly Notices of the Royal Astronomical Society: Letters'
+  1745-3933: 'Monthly Notices of the Royal Astronomical Society: Letters'
   1748-3387: Nature Nanotechnology
   1748-3395: Nature Nanotechnology
   1749-4885: Nature Photonics
