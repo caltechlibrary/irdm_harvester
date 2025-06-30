@@ -23,7 +23,7 @@ doi_prefix_publishers:
   10.1084: Rockefeller University Press
   10.1085: Rockefeller University Press
   10.1091: ASCB
-  10.1101: Cold Spring Harbor Laboratory Press
+  10.1101: bioRxiv
   10.1103: American Physical Society
   10.1109: IEEE
   10.1115: ASME
@@ -37,6 +37,8 @@ doi_prefix_publishers:
   10.2514: AIAA
   10.26508: Rockefeller University Press
   10.5194: European Geosciences Union
+  10.48550: arXiv
+  10.26434: ChemRxiv
 dot_initials: true
 issn_publishers:
   0002-9297: Cell Press
