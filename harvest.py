@@ -445,7 +445,7 @@ def check_record(data, review_message, token, production=True):
     headers = {"Authorization": f"Bearer {token}"}
     result = requests.get(
         headers=headers,
-        url=f'{base_url}api/requests/?q=title:"{title}"',
+        url=f'{base_url}api/requests/?q=title:"{title}"%20AND%20is_open:true',
     )
     if result.status_code == 200:
         result = result.json()
@@ -646,6 +646,14 @@ if __name__ == "__main__":
                         print(f"error= system error with doi2rdm {cleaned}")
                     break
                 try:
+                    review_message = check_record(
+                        data, review_message, token, production=production
+                    )
+                except Exception as e:
+                    cleaned = format_error(format_exc())
+                    print(f"error= system error with record checking {cleaned}")
+                    break
+                try:
                     data, review_message = add_dimensions_metadata(
                         data, doi, review_message
                     )
@@ -655,9 +663,6 @@ if __name__ == "__main__":
                     break
                 try:
                     data, files = cleanup_metadata(data)
-                    review_message = check_record(
-                        data, review_message, token, production=production
-                    )
                 except Exception as e:
                     cleaned = format_error(format_exc())
                     print(f"error= system error with metadata cleanup {cleaned}")
