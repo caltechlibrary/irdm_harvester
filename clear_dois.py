@@ -9,8 +9,9 @@ with open(infile, 'r') as f:
 with open("harvested_dois.txt") as infile:
     harvested_dois = infile.read().splitlines()
 
-for doi in harvested_dois:
-    if doi in dois:
+for doi in dois:
+    if doi in harvested_dois:
         harvested_dois.remove(doi)
+
 with open("harvested_dois.txt", 'w') as outfile:
     outfile.write('\n'.join(harvested_dois))
