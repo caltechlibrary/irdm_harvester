@@ -4452,3 +4452,9 @@ https://doi.org/10.1007/jhep08(2024)148
 10.1016/j.euromechsol.2025.105790
 10.1021/acsphotonics.5c01158
 10.1088/2632-2153/adf596
+10.1093/mnras/stac1923
+10.1093/mnras/stad3231
+10.1093/gji/ggac425
+10.1093/imrn/rnad261
+10.1093/gji/ggac290
+10.1093/mnras/stad3653
