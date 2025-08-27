@@ -69,10 +69,14 @@ def add_dimensions_metadata(metadata, doi, review_message):
     if "description" not in metadata["metadata"]:
         metadata["metadata"]["description"] = publication.get("abstract")
     if "pmcid" in publication:
+        if "identifiers" not in metadata["metadata"]:
+            metadata["metadata"]["identifiers"] = []
         metadata["metadata"]["identifiers"].append(
             {"scheme": "pmcid", "identifier": publication["pmcid"]}
         )
     if "pmid" in publication:
+        if "identifiers" not in metadata["metadata"]:
+            metadata["metadata"]["identifiers"] = []
         metadata["metadata"]["identifiers"].append(
             {"scheme": "pmid", "identifier": publication["pmid"]}
         )
