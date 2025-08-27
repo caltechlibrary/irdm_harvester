@@ -68,6 +68,14 @@ def add_dimensions_metadata(metadata, doi, review_message):
         publication = publication[0]
     if "description" not in metadata["metadata"]:
         metadata["metadata"]["description"] = publication.get("abstract")
+    if "pmcid" in publication:
+        metadata["metadata"]["identifiers"].append(
+            {"scheme": "pmcid", "identifier": publication["pmcid"]}
+        )
+    if "pmid" in publication:
+        metadata["metadata"]["identifiers"].append(
+            {"scheme": "pmid", "identifier": publication["pmid"]}
+        )
     dimensions_authors = publication["authors"]
     existing_authors = metadata["metadata"]["creators"]
     add_affil = True
