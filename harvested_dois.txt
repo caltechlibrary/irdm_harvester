@@ -4795,3 +4795,7 @@ https://doi.org/10.3749/2500023
 10.1103/kxbb-dpwp
 10.1103/brdj-ggfj
 10.1103/m7bv-c7rm
+10.1016/j.chemgeo.2025.123068
+10.1103/p1cm-9z8n
+10.3847/1538-4365/adfc6e
+10.1093/mtomcs/mfaf034
