@@ -233,7 +233,7 @@ def cleanup_metadata(metadata, production=True):
     # Clean up licenses
     licenses = {}
     with open("licenses.csv") as infile:
-        reader = csv.DictReader(infile, delimiter=";")
+        reader = csv.DictReader(infile, delimiter=",")
         for row in reader:
             licenses[row["props__url"]] = row["id"]
     rights = []
