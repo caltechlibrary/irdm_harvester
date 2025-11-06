@@ -242,27 +242,27 @@ def cleanup_metadata(metadata, production=True):
         for f in metadata["metadata"]["rights"]:
             if "link" in f:
                 link = f["link"]
+                # We need to have a license known to RDM
                 if link in licenses:
-                    rights.append({"id": licenses[link]})
-            if f["description"]["en"] == "vor":
-            #    rights.append(f)
-                if f["id"] == 'cc-by-4.0':
-                    doi = metadata["pids"]["doi"]["identifier"]
-                    response = requests.get('https://api.crossref.org/works/' + doi)
-                    if response.status_code == 200:
-                        data = response.json()
-                        try:
-                            links = data["message"]["link"]
-                            for link in links:
-                                if link["content-type"] == "application/pdf":
-                                    link = link["URL"]
-                                    requests.get(link)
-                                    fname = f"{doi.replace('/','_')}.pdf"
-                                    with open(fname, "wb") as f:
-                                        f.write(response.content)
-                                    files = fname
-                        except:
-                            pass
+                    license_id = licenses[link]
+                    rights.append({"id": license_id})
+                    if f["description"]["en"] == "vor":
+                        doi = metadata["pids"]["doi"]["identifier"]
+                        response = requests.get('https://api.crossref.org/works/' + doi)
+                        if response.status_code == 200:
+                            data = response.json()
+                            try:
+                                links = data["message"]["link"]
+                                for link in links:
+                                    if link["content-type"] == "application/pdf":
+                                        link = link["URL"]
+                                        requests.get(link)
+                                        fname = f"{doi.replace('/','_')}.pdf"
+                                        with open(fname, "wb") as f:
+                                            f.write(response.content)
+                                        files = fname
+                            except:
+                                pass
     if rights == []:
         rights.append({"id": "default"})
     metadata["metadata"]["rights"] = rights
