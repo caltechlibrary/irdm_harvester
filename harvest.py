@@ -4,6 +4,7 @@ import datetime
 import subprocess
 import requests
 import dimcli
+from pathlib import Path
 from idutils import normalize_doi, normalize_orcid
 from check_doi import check_doi
 from caltechdata_api import caltechdata_write, caltechdata_edit
@@ -258,8 +259,8 @@ def cleanup_metadata(metadata, production=True):
                                         link = link["URL"]
                                         response = requests.get(link)
                                         fname = f"{doi.replace('/','_')}.pdf"
-                                        with open(fname, "wb") as f:
-                                            f.write(response.content)
+                                        filename = Path(fname)
+                                        filename.write_bytes(response.content)
                                         files = fname
                             except:
                                 pass
