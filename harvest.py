@@ -256,7 +256,7 @@ def cleanup_metadata(metadata, production=True):
                                 for link in links:
                                     if link["content-type"] == "application/pdf":
                                         link = link["URL"]
-                                        requests.get(link)
+                                        response = requests.get(link)
                                         fname = f"{doi.replace('/','_')}.pdf"
                                         with open(fname, "wb") as f:
                                             f.write(response.content)
