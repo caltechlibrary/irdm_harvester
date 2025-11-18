@@ -5081,3 +5081,6 @@ https://doi.org/10.3749/2500023
 10.1007/jhep11(2025)038
 10.1103/7jzt-xhn6
 10.1103/xq5g-zm7z
+10.1093/mnrasl/slad060
+10.1093/mnras/stad1806
+10.1093/mnras/stad976
