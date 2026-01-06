@@ -153,12 +153,6 @@ def add_dimensions_metadata(metadata, doi, review_message):
 
 
 def cleanup_metadata(metadata, production=True):
-    # Read in supported identitifiers - this will go away once we upgrade
-    # authors
-    with open("ror.txt") as infile:
-        lines = infile.readlines()
-        ror = [e.strip() for e in lines]
-
     # Read in groups list
     groups_list = {}
     clpid_list = {}
@@ -209,18 +203,16 @@ def cleanup_metadata(metadata, production=True):
                 if "identifiers" not in person:
                     person["identifiers"] = []
                 person["identifiers"].append({"scheme": "clpid", "identifier": clpid})
-        # We need to check affiliation identifiers until we can update authors
+        # We need to check affiliation identifiers for duplicates, until supported in RDM
         if "affiliations" in creator:
             clean_affiliations = []
             affil_ids = []
-            #  We also need to check for duplicates, until supported in RDM
             for affiliation in creator["affiliations"]:
                 if "id" in affiliation:
                     idv = affiliation["id"]
                     if idv not in affil_ids:
-                        if idv in ror:
-                            clean_affiliations.append(affiliation)
-                            affil_ids.append(idv)
+                        clean_affiliations.append(affiliation)
+                        affil_ids.append(idv)
                 else:
                     clean_affiliations.append(affiliation)
             creator["affiliations"] = clean_affiliations
