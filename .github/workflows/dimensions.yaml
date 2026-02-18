@@ -38,7 +38,7 @@ jobs:
       DOI: ${{ needs.get-dimensions.outputs.dois }}
     steps: 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Process DOIs
         shell: bash
         run: python split_doi.py >> $GITHUB_OUTPUT
@@ -106,7 +106,7 @@ jobs:
       result: "${{ steps.read.outputs.result }}"
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: main
       - name: read
@@ -119,7 +119,7 @@ jobs:
           python save_dois.py '${{steps.read.outputs.result}}'
       - name: Commit and Push Changes
         id: commit-and-push
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: 'Update harvested DOIs'
           file_pattern: 'harvested_dois.txt'
@@ -131,7 +131,7 @@ jobs:
       result: "${{ steps.read.outputs.result }}"
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: read
         uses: cloudposse/github-action-matrix-outputs-read@main
         id: read
