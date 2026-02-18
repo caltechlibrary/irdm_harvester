@@ -20,7 +20,7 @@ jobs:
       message: ${{ steps.harvest.outputs.message }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Python Deps
         shell: bash
         run: pip install -r requirements.txt --break-system-packages
@@ -38,7 +38,7 @@ jobs:
       DOI: ${{ needs.get-orcid.outputs.dois }}
     steps: 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Process DOIs
         shell: bash
         run: python split_doi.py >> $GITHUB_OUTPUT
@@ -55,7 +55,7 @@ jobs:
       dois: ${{ steps.step1.outputs.matrix }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Python Deps
         shell: bash
         run: pip install -r requirements.txt --break-system-packages
@@ -101,7 +101,7 @@ jobs:
       result: "${{ steps.read.outputs.result }}"
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: read
         uses: cloudposse/github-action-matrix-outputs-read@main
         id: read
@@ -123,7 +123,7 @@ jobs:
       result: "${{ steps.read.outputs.result }}"
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: read
         uses: cloudposse/github-action-matrix-outputs-read@main
         id: read
