@@ -5891,3 +5891,6 @@ https://doi.org/10.1016/j.cell.2025.11.006
 10.7185/geochemlet.2449
 10.1016/j.jpaa.2023.107489
 10.1016/j.jalgebra.2022.07.039
+10.1093/mtomcs/mfae050
+10.3847/PSJ/ae374e
+10.7185/geochemlet.2544
