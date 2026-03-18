@@ -671,7 +671,7 @@ resource_types:
   experiment: publication-deliverable
   image: other
   journal-article: publication-article
-  journal_issue: publication-issue
+  journal-issue: publication-issue
   lab_notes: labnotebook
   monograph: publication-report
   oral_history: publication-oralhistory
