@@ -9,11 +9,9 @@ on:
       issue:
         description: 'Issue'
         required: true
-        default: 'new'
       version:
         description: 'Issue'
         required: true
-        default: 'new'
 
 jobs:
   template:
