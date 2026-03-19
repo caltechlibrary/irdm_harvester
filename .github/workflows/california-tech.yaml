@@ -6,10 +6,10 @@ on:
       date:
         description: 'Publication date (format 2026-03-19)'
         required: true
-      issue:
-        description: 'Issue'
+      volume:
+        description: 'Volume'
         required: true
-      version:
+      issue:
         description: 'Issue'
         required: true
 
@@ -27,4 +27,4 @@ jobs:
         env:
             RDMTOK: ${{ secrets.RDMTOK }}
         id: template
-        run: python template.py california-tech -date ${{ github.event.inputs.date }} -issue ${{ github.event.inputs.issue }} -version ${{ github.event.inputs.version }} >> $GITHUB_OUTPUT
+        run: python template.py california-tech -date ${{ github.event.inputs.date }} -issue ${{ github.event.inputs.issue }} -volume ${{ github.event.inputs.volume }} >> $GITHUB_OUTPUT
