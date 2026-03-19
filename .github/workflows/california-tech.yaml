@@ -1,4 +1,4 @@
-name: Create a template record for the California Tech
+name: California Tech template record creation
 
 on:
   workflow_dispatch:
