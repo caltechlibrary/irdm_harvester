@@ -10,6 +10,7 @@ from check_doi import check_doi
 from caltechdata_api import caltechdata_write, caltechdata_edit
 from wos import get_wos_dois
 from traceback import format_exc
+from utils import format_error
 
 
 def grid_to_ror(grid):
@@ -20,7 +21,9 @@ def grid_to_ror(grid):
     elif grid == "grid.465477.3":
         ror = "00em52312"
     else:
-        url = f"https://api.ror.org/organizations?query.advanced=external_ids.all:{grid}"
+        url = (
+            f"https://api.ror.org/organizations?query.advanced=external_ids.all:{grid}"
+        )
         results = requests.get(url).json()
         if len(results["items"]) == 0:
             ror = None
@@ -241,7 +244,7 @@ def cleanup_metadata(metadata, production=True):
                     rights.append({"id": license_id})
                     if f["description"]["en"] == "vor":
                         doi = metadata["pids"]["doi"]["identifier"]
-                        response = requests.get('https://api.crossref.org/works/' + doi)
+                        response = requests.get("https://api.crossref.org/works/" + doi)
                         if response.status_code == 200:
                             data = response.json()
                             try:
@@ -418,18 +421,6 @@ def read_outputs():
         arxiv_dois.append(row[0])
     infile.close()
     return dois, new_dois, existing_dois, arxiv_dois
-
-
-def format_error(e):
-    return (
-        e.replace("\n", "-")
-        .replace(":", "-")
-        .replace("'", "-")
-        .replace('"', "-")
-        .replace("=", "-")
-        .replace("(", "-")
-        .replace(")", "-")
-    )
 
 
 def check_record(data, review_message, token, production=True):

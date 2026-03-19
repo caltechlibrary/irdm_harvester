@@ -1,0 +1,32 @@
+name: Create a template record for the California Tech
+
+on:
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'Publication date (format 2026-03-19)'
+        required: true
+      issue:
+        description: 'Issue'
+        required: true
+        default: 'new'
+      version:
+        description: 'Issue'
+        required: true
+        default: 'new'
+
+jobs:
+  template:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Python Deps
+        shell: bash
+        run: pip install -r requirements.txt --break-system-packages
+      - name: Create template
+        shell: bash
+        env:
+            RDMTOK: ${{ secrets.RDMTOK }}
+        id: template
+        run: python template.py california-tech -date ${{ github.event.inputs.date }} -issue ${{ github.event.inputs.issue }} -version ${{ github.event.inputs.version }} >> $GITHUB_OUTPUT
