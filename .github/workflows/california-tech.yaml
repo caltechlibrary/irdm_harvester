@@ -27,4 +27,4 @@ jobs:
         env:
             RDMTOK: ${{ secrets.RDMTOK }}
         id: template
-        run: python template.py california_tech -date ${{ github.event.inputs.date }} -issue ${{ github.event.inputs.issue }} -volume ${{ github.event.inputs.volume }} -actor ${{github.actor}
+        run: python template.py california_tech -date ${{ github.event.inputs.date }} -issue ${{ github.event.inputs.issue }} -volume ${{ github.event.inputs.volume }} -actor ${{github.actor}}
