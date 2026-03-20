@@ -117,3 +117,5 @@ if __name__ == "__main__":
             print(
                 f"error= system error with writing metadata to CaltechAUTHORS {cleaned}"
             )
+    else:
+        print(f"error= invalid harvest type: {harvest_type}")
