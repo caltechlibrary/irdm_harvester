@@ -13,6 +13,7 @@ if __name__ == "__main__":
     parser.add_argument("-issue", help="Issue number")
     parser.add_argument("-volume", help="Volume number")
     parser.add_argument("-date", help="Publication date (YYYY-MM-DD)")
+    parser.add_argument("-actor", help="Name of actor to use for review message")
     parser.add_argument("-test", action="store_true", help="Use the test environment")
     args = parser.parse_args()
 
@@ -110,6 +111,7 @@ if __name__ == "__main__":
                 authors=True,
                 community=community,
                 publish=False,
+                review_message=f"Template record created for California Tech by {args.actor} ",
             )
             print("templae created", response)
         except Exception as e:
