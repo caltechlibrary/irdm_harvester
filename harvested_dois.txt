@@ -6167,3 +6167,5 @@ https://doi.org/10.1016/j.cell.2025.11.006
 10.1103/rpj5-cns6
 10.1016/j.gca.2025.09.026
 10.1093/petrology/egaf096
+10.2138/gselements.18.2.75
+10.2138/gselements.17.5.299
