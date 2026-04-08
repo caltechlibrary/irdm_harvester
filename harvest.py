@@ -514,7 +514,7 @@ if __name__ == "__main__":
         if args.message:
             review_message = args.message
         else:
-            review_message = f"Automatically added from Crossref based on Caltech ROR affiliation. {tag}"
+            review_message = f"Automatically added from @crossref based on Caltech ROR affiliation. {tag}"
         if args.print:
             ostring = "dois="
             for doi in dois:
@@ -565,7 +565,7 @@ if __name__ == "__main__":
         if args.message:
             review_message = args.message
         else:
-            review_message = "Automatically added from Dimensions Caltech affiliation harvest with metadata from Crossref. {tag}"
+            review_message = "Automatically added from @dimensions Caltech affiliation harvest with metadata from Crossref. {tag}"
         if args.print:
             ostring = "dois="
             for doi in dois:
@@ -578,7 +578,7 @@ if __name__ == "__main__":
         if args.message:
             review_message = args.message
         else:
-            review_message = f"Automatically added from ORCID from record {args.orcid} by {args.actor}. {tag}"
+            review_message = f"Automatically added from @ORCID from record {args.orcid} by {args.actor}. {tag}"
         if args.print:
             ostring = "dois= "
             for doi in dois:
