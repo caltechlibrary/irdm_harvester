@@ -6573,3 +6573,4 @@ https://doi.org/10.1016/j.cell.2025.11.006
 10.1021/acsenergylett.4c01866
 10.1515/nanoph-2023-0649
 10.1093/mnras/staf1421
+10.1016/j.device.2024.100506
