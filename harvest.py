@@ -253,10 +253,12 @@ def cleanup_metadata(metadata, production=True):
                                     if link["content-type"] == "application/pdf":
                                         link = link["URL"]
                                         response = requests.get(link)
-                                        fname = f"{doi.replace('/','_')}.pdf"
-                                        filename = Path(fname)
-                                        filename.write_bytes(response.content)
-                                        files = fname
+                                        content_type = r.headers.get("Content-Type", "")
+                                        if "application/pdf" in content_type:
+                                            fname = f"{doi.replace('/','_')}.pdf"
+                                            filename = Path(fname)
+                                            filename.write_bytes(response.content)
+                                            files = fname
                             except:
                                 pass
     if rights == []:
@@ -475,7 +477,12 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-publish",
-        help="Immediately publish records (does not go to requew queue)",
+        help="Immediately publish records (does not go to review queue)",
+        action="store_true",
+    )
+    parser.add_argument(
+        "-write-local",
+        help="Write DOIs to local file (not using a GitHub workflow)",
         action="store_true",
     )
     args = parser.parse_args()
@@ -496,7 +503,7 @@ if __name__ == "__main__":
     if production:
         community = "aedd135f-227e-4fdf-9476-5b3fd011bac6"
     else:
-        community = "ab23cb28-94b9-42db-80e6-c6ed80faafd0"
+        community = "fb980d43-af44-48bc-bdd6-f785653038b8"
 
     if args.tag:
         if args.tag != "":
@@ -625,8 +632,9 @@ if __name__ == "__main__":
 
     for doi in dois:
         doi = normalize_doi(doi)
-        if not check_doi(doi, production=production, token=token):
-            if doi not in harvested_dois:
+        if doi not in harvested_dois:
+            if not check_doi(doi, production=production, token=token):
+                print(f"processing {doi}")
                 try:
                     transformed = subprocess.check_output(
                         ["doi2rdm", "options.yaml", doi]
@@ -678,6 +686,9 @@ if __name__ == "__main__":
                         publish=publish,
                     )
                     print("doi=", doi)
+                    if args.write_local:
+                        with open("harvested_dois.txt", "a") as outfile:
+                            outfile.write(f"{doi}\n")
                 except Exception as e:
                     cleaned = format_error(format_exc())
                     print(
