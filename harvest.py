@@ -600,6 +600,14 @@ if __name__ == "__main__":
         else:
             review_message = f"""Automatically added by {args.actor} as part of
             import from DOI list: {args.doi}. {tag}"""
+    elif harvest_type == "doi_list":
+        with open(args.doi, "r") as infile:
+            dois = infile.read().splitlines()
+        if args.message:
+            review_message = args.message
+        else:
+            review_message = f"""Automatically added by {args.actor} as part of
+            import from DOI list: {args.doi}. {tag}"""
     elif harvest_type == "wos":
         dois = get_wos_dois("2M")
         new_dois = []
