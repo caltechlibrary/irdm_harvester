@@ -642,7 +642,6 @@ if __name__ == "__main__":
         doi = normalize_doi(doi)
         if doi not in harvested_dois:
             if not check_doi(doi, production=production, token=token):
-                print(f"processing {doi}")
                 try:
                     transformed = subprocess.check_output(
                         ["doi2rdm", "options.yaml", doi]
