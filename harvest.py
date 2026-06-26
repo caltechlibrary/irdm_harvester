@@ -519,15 +519,15 @@ if __name__ == "__main__":
     if harvest_type == "crossref":
         dois = get_crossref_ror()
         if args.message:
-            review_message = args.message
+            review_start = args.message
         else:
-            review_message = f"Automatically added from @crossref based on Caltech ROR affiliation. {tag}"
+            review_start = f"Automatically added from @crossref based on Caltech ROR affiliation. {tag}"
         if args.print:
             ostring = "dois="
             for doi in dois:
                 ostring += f" {doi}"
             print(ostring)
-            print(f"message= {review_message}")
+            print(f"message= {review_start}")
             dois = []
     elif harvest_type == "authors":
         dois = []
@@ -570,43 +570,43 @@ if __name__ == "__main__":
     elif harvest_type == "dimensions":
         dois = get_dimensions()
         if args.message:
-            review_message = args.message
+            review_start = args.message
         else:
-            review_message = "Automatically added from @dimensions Caltech affiliation harvest with metadata from Crossref. {tag}"
+            review_start = "Automatically added from @dimensions Caltech affiliation harvest with metadata from Crossref. {tag}"
         if args.print:
             ostring = "dois="
             for doi in dois:
                 ostring += f" {doi}"
             print(ostring)
-            print(f"message= {review_message}")
+            print(f"message= {review_start}")
             dois = []
     elif harvest_type == "orcid":
         dois = get_orcid_works(args.orcid)
         if args.message:
-            review_message = args.message
+            review_start = args.message
         else:
-            review_message = f"Automatically added from @ORCID from record {args.orcid} by {args.actor}. {tag}"
+            review_start = f"Automatically added from @ORCID from record {args.orcid} by {args.actor}. {tag}"
         if args.print:
             ostring = "dois= "
             for doi in dois:
                 ostring += f" {doi}"
             print(ostring)
-            print(f"message= {review_message}")
+            print(f"message= {review_start}")
             dois = []
     elif harvest_type == "doi":
         dois = args.doi.split(" ")
         if args.message:
-            review_message = args.message
+            review_start = args.message
         else:
-            review_message = f"""Automatically added by {args.actor} as part of
+            review_start = f"""Automatically added by {args.actor} as part of
             import from DOI list: {args.doi}. {tag}"""
     elif harvest_type == "doi_list":
         with open(args.doi, "r") as infile:
             dois = infile.read().splitlines()
         if args.message:
-            review_message = args.message
+            review_start = args.message
         else:
-            review_message = f"""Automatically added by {args.actor} as part of
+            review_start = f"""Automatically added by {args.actor} as part of
             import from DOI list: {args.doi}. {tag}"""
     elif harvest_type == "wos":
         dois = get_wos_dois("2M")
@@ -640,6 +640,7 @@ if __name__ == "__main__":
 
     for doi in dois:
         doi = normalize_doi(doi)
+        review_message = review_start
         if doi not in harvested_dois:
             if not check_doi(doi, production=production, token=token):
                 try:
