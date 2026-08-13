@@ -7816,3 +7816,4 @@ https://doi.org/10.48550/arXiv.2604.04966
 10.47456/cad.astro.v7nespecial.53384
 10.2110/sepmmisc.24.123
 10.2110/sepmmisc.24.196
+10.1029/2026JB034060
