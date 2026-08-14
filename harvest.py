@@ -2,12 +2,18 @@ import os, csv, json
 import argparse
 import datetime
 import subprocess
+import tempfile
 import requests
 import dimcli
 from pathlib import Path
 from idutils import normalize_doi, normalize_orcid
 from check_doi import check_doi
-from caltechdata_api import caltechdata_write, caltechdata_edit
+from caltechdata_api import (
+    caltechdata_write,
+    caltechdata_edit,
+    get_files_from_record,
+    download_files_from_record,
+)
 from wos import get_wos_dois
 from traceback import format_exc
 from utils import format_error
@@ -534,7 +540,7 @@ if __name__ == "__main__":
         if production == False:
             base_url = "https://authors.caltechlibrary.dev/"
         else:
-            base_url = "https://authors.library.caltech.edu"
+            base_url = "https://authors.library.caltech.edu/"
         if args.authors_source and args.authors_destination:
             source = args.authors_source
             destination = args.authors_destination
@@ -550,20 +556,46 @@ if __name__ == "__main__":
             else:
                 print(f"error=destination record {destination} not found")
                 exit()
-            try:
-                response = caltechdata_edit(
-                    destination,
-                    source_record,
-                    token,
-                    production=production,
-                    authors=True,
-                    new_version=True,
-                )
-            except Exception as e:
-                cleaned = format_error(format_exc())
-                print(
-                    f"error= system error with writing metadata to CaltechAUTHORS {cleaned}"
-                )
+            with tempfile.TemporaryDirectory() as folder:
+                try:
+                    filenames = sorted(
+                        get_files_from_record(
+                            source, production=production, authors=True
+                        )
+                    )
+                    download_files_from_record(
+                        source,
+                        folder,
+                        filenames=filenames,
+                        production=production,
+                        authors=True,
+                    )
+                    files = [str(Path(folder) / name) for name in filenames]
+                    print(f"Downloaded {len(files)} file(s) from record {source}")
+                except Exception as e:
+                    cleaned = format_error(format_exc())
+                    print(
+                        f"error= system error with downloading files from CaltechAUTHORS {cleaned}"
+                    )
+                    exit()
+                # Keep the file the source record shows in the preview
+                default_preview = source_record.get("files", {}).get("default_preview")
+                try:
+                    response = caltechdata_edit(
+                        destination,
+                        source_record,
+                        token,
+                        production=production,
+                        authors=True,
+                        new_version=True,
+                        files=files,
+                        default_preview=default_preview,
+                    )
+                except Exception as e:
+                    cleaned = format_error(format_exc())
+                    print(
+                        f"error= system error with writing metadata to CaltechAUTHORS {cleaned}"
+                    )
         else:
             print(f"error=source and destination records must be provided")
             exit()
