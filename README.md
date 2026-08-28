@@ -59,7 +59,7 @@ For all harvests there is an `-actor` flag, which gets included in the message w
 
 For command line use you need the latest version of `irdmtools` installed:
 
-`curl https://caltechlibrary.github.io/irdmtools/installer.sh | sh`
+`curl https://software.library.caltech.edu/irdmtools/installer.sh | sh`
 
 Then install the python requirements with
 
