@@ -47,7 +47,7 @@ jobs:
         run: mkdir $HOME/Downloads
       - name: Install irdmtools
         shell: bash
-        run: curl https://caltechlibrary.github.io/irdmtools/installer.sh | sh
+        run: curl https://software.library.caltech.edu/irdmtools/installer.sh | sh
       - name: Path
         shell: bash
         run: cp $HOME/bin/doi2rdm $HOME/.local/bin/.
