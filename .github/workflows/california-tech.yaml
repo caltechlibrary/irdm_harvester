@@ -19,12 +19,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-      - name: Python Deps
-        shell: bash
-        run: pip install -r requirements.txt --break-system-packages
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
       - name: Create template
         shell: bash
         env:
             RDMTOK: ${{ secrets.RDMTOK }}
         id: template
-        run: python template.py california_tech -date ${{ github.event.inputs.date }} -issue ${{ github.event.inputs.issue }} -volume ${{ github.event.inputs.volume }} -actor ${{github.actor}}
+        run: uv run template.py california_tech -date ${{ github.event.inputs.date }} -issue ${{ github.event.inputs.issue }} -volume ${{ github.event.inputs.volume }} -actor ${{github.actor}}

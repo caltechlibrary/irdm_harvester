@@ -1,5 +1,5 @@
 import requests
-import os, urllib
+import sys, json, os, urllib
 
 
 def extract_dois(records, dois):
@@ -46,6 +46,8 @@ def get_wos_dois(harvest_period):
         records = response["Data"]["Records"]["records"]["REC"]
     except:
         print(response)
+    print(json.dumps(records, indent=4))
+    exit()
     dois = []
     extract_dois(records, dois)
     # We have saved the first 100 records
@@ -90,3 +92,6 @@ def get_wos_dois(harvest_period):
             record_count = 0
 
     return dois
+
+if __name__ == '__main__':
+    get_wos_dois(sys.argv[1])

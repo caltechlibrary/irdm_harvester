@@ -22,9 +22,13 @@ jobs:
     steps: 
       - name: Checkout
         uses: actions/checkout@v7
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
       - name: Process DOIs
         shell: bash
-        run: python split_doi.py >> $GITHUB_OUTPUT
+        run: uv run split_doi.py >> $GITHUB_OUTPUT
         id: step1
   harvest:
     runs-on: ubuntu-24.04
@@ -39,9 +43,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-      - name: Python Deps
-        shell: bash
-        run: pip install -r requirements.txt --break-system-packages
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
       - name: Make downloads folder
         shell: bash
         run: mkdir $HOME/Downloads
@@ -57,7 +62,7 @@ jobs:
             RDMTOK: ${{ secrets.RDMTOK }}
             DIMKEY: ${{ secrets.DIMKEY }}
         id: harvest
-        run: python harvest.py doi -doi "${{matrix.doi}}" -actor ${{github.actor}} -tag ${{ github.event.inputs.tag }} >> $GITHUB_OUTPUT
+        run: uv run harvest.py doi -doi "${{matrix.doi}}" -actor ${{github.actor}} -tag ${{ github.event.inputs.tag }} >> $GITHUB_OUTPUT
       - uses: cloudposse/github-action-matrix-outputs-write@main
         id: out
         with:
@@ -95,9 +100,13 @@ jobs:
         id: read
         with:
           matrix-step-name: harvest
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
       - name: write DOI
         run: |
-          python save_dois.py '${{steps.read.outputs.result}}'
+          uv run save_dois.py '${{steps.read.outputs.result}}'
       - name: Commit File
         uses: EndBug/add-and-commit@v11
         with:
@@ -117,6 +126,10 @@ jobs:
         id: read
         with:
           matrix-step-name: harvest
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
       - name: System error on DOI
         run: |
-          python check_status.py '${{steps.read.outputs.result}}'
+          uv run check_status.py '${{steps.read.outputs.result}}'

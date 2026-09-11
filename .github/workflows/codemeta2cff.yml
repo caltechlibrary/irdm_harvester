@@ -1,9 +1,9 @@
 name: CodeMeta2CFF
+run-name: Run CodeMeta2CFF after ${{github.event_name}} by ${{github.actor}}
 
 on:
   push:
-    tags:
-      - v*    
+    paths: ['codemeta.json']
   workflow_dispatch:
     inputs:
       reason:
@@ -13,7 +13,7 @@ on:
 
 jobs:
   CodeMeta2CFF:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -22,6 +22,5 @@ jobs:
       - name: Commit CFF
         uses: EndBug/add-and-commit@v11
         with:
-          message: 'Add CITATION.cff for release'
+          message: 'Add updated CITATION.cff from codemeta.json file'
           add: 'CITATION.cff'
-          branch: 'main'
