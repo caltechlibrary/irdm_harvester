@@ -1,0 +1,13 @@
+[project]
+name = "irdm-harvester"
+version = "0.2.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "caltechdata-api>=2.2.0",
+    "dimcli",
+]
+
+[tool.uv.sources]
+dimcli = { git = "https://github.com/caltechlibrary/dimcli", rev = "cris-auth" }

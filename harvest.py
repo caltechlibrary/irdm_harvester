@@ -548,8 +548,16 @@ if __name__ == "__main__":
             if response.status_code == 200:
                 source_record = response.json()
             else:
-                print(f"error=source record {source} not found")
-                exit()
+                headers = {"accept": "application/json",
+                           "Authorization":f"Bearer {token}"}
+                print(headers)
+                response = requests.get(f"{base_url}api/records/{source}/draft",headers=headers)
+                print(response.status_code)
+                if response.status_code == 200:
+                    source_record = response.json()
+                else:
+                    print(f"error=source record {source} not found")
+                    exit()
             response = requests.get(f"{base_url}api/records/{destination}")
             if response.status_code == 200:
                 destination_record = response.json()
@@ -560,7 +568,7 @@ if __name__ == "__main__":
                 try:
                     filenames = sorted(
                         get_files_from_record(
-                            source, production=production, authors=True
+                            source, production=production, authors=True, token=token
                         )
                     )
                     download_files_from_record(
@@ -569,6 +577,7 @@ if __name__ == "__main__":
                         filenames=filenames,
                         production=production,
                         authors=True,
+                        token=token
                     )
                     files = [str(Path(folder) / name) for name in filenames]
                     print(f"Downloaded {len(files)} file(s) from record {source}")
