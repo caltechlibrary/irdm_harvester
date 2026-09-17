@@ -8172,3 +8172,4 @@ https://doi.org/10.48550/arXiv.2604.04966
 10.1111/ssqu.70194
 10.1016/j.astropartphys.2026.103293
 10.1016/j.compfluid.2026.107275
+10.1162/DAED.a.985
