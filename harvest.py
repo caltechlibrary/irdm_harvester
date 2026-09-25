@@ -462,6 +462,35 @@ def check_record(data, review_message, token, production=True):
     return review_message
 
 
+def edit_destination(
+    destination,
+    data,
+    token,
+    production=True,
+    files=None,
+    default_preview=None,
+    publish=False,
+):
+    # Write metadata (and optionally files) as a new version of an existing record
+    try:
+        caltechdata_edit(
+            destination,
+            data,
+            token,
+            production=production,
+            authors=True,
+            new_version=True,
+            files=files,
+            default_preview=default_preview,
+            publish=publish,
+        )
+        return True
+    except Exception as e:
+        cleaned = format_error(format_exc())
+        print(f"error= system error with writing metadata to CaltechAUTHORS {cleaned}")
+        return False
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Harvest DOIs from Crossref or ORCID and add to CaltechAUTHORS"
@@ -472,7 +501,10 @@ if __name__ == "__main__":
     parser.add_argument("-orcid", help="ORCID ID to harvest from")
     parser.add_argument("-doi", help="DOI to harvest")
     parser.add_argument("-authors-source", help="Source record from authors")
-    parser.add_argument("-authors-destination", help="Destination record from authors")
+    parser.add_argument(
+        "-authors-destination",
+        help="Destination record from authors (new version is created instead of a new record)",
+    )
     parser.add_argument("-actor", help="Name of actor to use for review message")
     parser.add_argument("-message", help="Message to use in submission comment")
     parser.add_argument("-tag", help="Tag to use in submission comment")
@@ -522,6 +554,21 @@ if __name__ == "__main__":
     else:
         tag = ""
 
+    if production == False:
+        base_url = "https://authors.caltechlibrary.dev/"
+    else:
+        base_url = "https://authors.library.caltech.edu/"
+
+    publish = args.publish
+
+    # Optional existing record to update instead of creating a new record
+    destination = args.authors_destination
+    if destination:
+        response = requests.get(f"{base_url}api/records/{destination}")
+        if response.status_code != 200:
+            print(f"error=destination record {destination} not found")
+            exit()
+
     if harvest_type == "crossref":
         dois = get_crossref_ror()
         if args.message:
@@ -537,33 +584,24 @@ if __name__ == "__main__":
             dois = []
     elif harvest_type == "authors":
         dois = []
-        if production == False:
-            base_url = "https://authors.caltechlibrary.dev/"
-        else:
-            base_url = "https://authors.library.caltech.edu/"
-        if args.authors_source and args.authors_destination:
+        if args.authors_source and destination:
             source = args.authors_source
-            destination = args.authors_destination
             response = requests.get(f"{base_url}api/records/{source}")
             if response.status_code == 200:
                 source_record = response.json()
             else:
-                headers = {"accept": "application/json",
-                           "Authorization":f"Bearer {token}"}
-                print(headers)
-                response = requests.get(f"{base_url}api/records/{source}/draft",headers=headers)
-                print(response.status_code)
+                headers = {
+                    "accept": "application/json",
+                    "Authorization": f"Bearer {token}",
+                }
+                response = requests.get(
+                    f"{base_url}api/records/{source}/draft", headers=headers
+                )
                 if response.status_code == 200:
                     source_record = response.json()
                 else:
                     print(f"error=source record {source} not found")
                     exit()
-            response = requests.get(f"{base_url}api/records/{destination}")
-            if response.status_code == 200:
-                destination_record = response.json()
-            else:
-                print(f"error=destination record {destination} not found")
-                exit()
             with tempfile.TemporaryDirectory() as folder:
                 try:
                     filenames = sorted(
@@ -577,7 +615,7 @@ if __name__ == "__main__":
                         filenames=filenames,
                         production=production,
                         authors=True,
-                        token=token
+                        token=token,
                     )
                     files = [str(Path(folder) / name) for name in filenames]
                     print(f"Downloaded {len(files)} file(s) from record {source}")
@@ -589,22 +627,15 @@ if __name__ == "__main__":
                     exit()
                 # Keep the file the source record shows in the preview
                 default_preview = source_record.get("files", {}).get("default_preview")
-                try:
-                    response = caltechdata_edit(
-                        destination,
-                        source_record,
-                        token,
-                        production=production,
-                        authors=True,
-                        new_version=True,
-                        files=files,
-                        default_preview=default_preview,
-                    )
-                except Exception as e:
-                    cleaned = format_error(format_exc())
-                    print(
-                        f"error= system error with writing metadata to CaltechAUTHORS {cleaned}"
-                    )
+                edit_destination(
+                    destination,
+                    source_record,
+                    token,
+                    production=production,
+                    files=files,
+                    default_preview=default_preview,
+                    publish=publish,
+                )
         else:
             print(f"error=source and destination records must be provided")
             exit()
@@ -613,7 +644,7 @@ if __name__ == "__main__":
         if args.message:
             review_start = args.message
         else:
-            review_start = "Automatically added from @dimensions Caltech affiliation harvest with metadata from Crossref. {tag}"
+            review_start = f"Automatically added from @dimensions Caltech affiliation harvest with metadata from Crossref. {tag}"
         if args.print:
             ostring = "dois="
             for doi in dois:
@@ -679,6 +710,10 @@ if __name__ == "__main__":
     else:
         print("error: system error invalid harvest type")
 
+    if destination and len(dois) > 1:
+        print(f"error=only one DOI can be written to destination record {destination}")
+        exit()
+
     for doi in dois:
         doi = normalize_doi(doi)
         review_message = review_start
@@ -719,31 +754,40 @@ if __name__ == "__main__":
                     cleaned = format_error(format_exc())
                     print(f"error= system error with metadata cleanup {cleaned}")
                     break
-                try:
-                    if args.publish:
-                        publish = True
-                    else:
-                        publish = False
-                    response = caltechdata_write(
+                if destination:
+                    written = edit_destination(
+                        destination,
                         data,
                         token,
                         production=production,
-                        authors=True,
-                        community=community,
-                        review_message=review_message,
                         files=files,
                         publish=publish,
                     )
+                else:
+                    try:
+                        response = caltechdata_write(
+                            data,
+                            token,
+                            production=production,
+                            authors=True,
+                            community=community,
+                            review_message=review_message,
+                            files=files,
+                            publish=publish,
+                        )
+                        written = True
+                    except Exception as e:
+                        cleaned = format_error(format_exc())
+                        print(
+                            f"error= system error with writing metadata to CaltechAUTHORS {cleaned}"
+                        )
+                        written = False
+                if written:
                     print("doi=", doi)
                     if args.write_local:
                         with open("harvested_dois.txt", "a") as outfile:
                             outfile.write(f"{doi}\n")
-                except Exception as e:
-                    cleaned = format_error(format_exc())
-                    print(
-                        f"error= system error with writing metadata to CaltechAUTHORS {cleaned}"
-                    )
             else:
-                print(f"error=DOI {doi} has already been harvested, skipping")
+                print(f"error=DOI {doi} is already in CaltechAUTHORS, skipping")
         else:
-            print(f"error=DOI {doi} is already in CaltechAUTHORS, skipping")
+            print(f"error=DOI {doi} has already been harvested, skipping")
