@@ -58,10 +58,10 @@ if __name__ == "__main__":
                 "contributors": [
                     {
                         "person_or_org": {
-                            "family_name": "Wilson",
-                            "given_name": "Damien",
+                            "family_name": "Yu",
+                            "given_name": "Emily Q.",
                             "identifiers": [
-                                {"identifier": "Wilson-Damien", "scheme": "clpid"}
+                                {"identifier": "Yu-Emily-Q", "scheme": "clpid"}
                             ],
                             "name": "Wilson, Damien",
                             "type": "personal",
