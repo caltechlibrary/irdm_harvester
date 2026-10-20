@@ -63,7 +63,7 @@ if __name__ == "__main__":
                             "identifiers": [
                                 {"identifier": "Yu-Emily-Q", "scheme": "clpid"}
                             ],
-                            "name": "Wilson, Damien",
+                            "name": "Yu, Emily Q.",
                             "type": "personal",
                         },
                         "role": {"id": "editor"},
