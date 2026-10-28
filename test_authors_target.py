@@ -55,20 +55,8 @@ class BaseUrlTests(unittest.TestCase):
         os.environ["AUTHORS_LOCAL_URL"] = "https://localhost:8443"
         self.assertEqual(base_url(production=False, local=True), LOCAL)
 
-    def test_url_names_any_target_and_gets_one_trailing_slash(self):
-        for given in ("https://authors.example.org", "https://authors.example.org/"):
-            self.assertEqual(
-                base_url(production=False, url=given), "https://authors.example.org/"
-            )
 
-    def test_url_wins_over_production_and_local(self):
-        self.assertEqual(
-            base_url(production=True, local=True, url="https://x.example/"),
-            "https://x.example/",
-        )
 
-    def test_blank_url_is_ignored(self):
-        self.assertEqual(base_url(production=False, url="  "), DEV)
 
     def test_tls_verify_is_off_only_for_local(self):
         self.assertTrue(tls_verify(local=False))
@@ -94,14 +82,12 @@ class CommunityTests(unittest.TestCase):
         os.environ[COMMUNITY_ENV] = "abc-123"
         self.assertEqual(community_id(production=False, local=True), "abc-123")
 
-    def test_url_also_reads_the_environment(self):
-        import os
 
-        os.environ[COMMUNITY_ENV] = "def-456"
-        self.assertEqual(community_id(production=False, url="https://x.example/"), "def-456")
 
-    def test_url_without_the_environment_is_an_error(self):
-        with self.assertRaises(ValueError):
+    def test_there_is_no_url_target(self):
+        with self.assertRaises(TypeError):
+            base_url(production=False, url="https://x.example/")
+        with self.assertRaises(TypeError):
             community_id(production=False, url="https://x.example/")
 
     def test_local_without_the_environment_is_an_error_naming_it(self):
@@ -174,19 +160,15 @@ class CheckDoiTests(unittest.TestCase):
         self.assertTrue(self.url().startswith(LOCAL + "api/records?"))
         self.assertIs(self.kw()["verify"], False)
 
-    def test_url_target_keeps_tls_verification_on(self):
-        self.check_doi("10.1/x", production=False, url="https://authors.example.org")
-        self.assertTrue(self.url().startswith("https://authors.example.org/api/records?"))
-        self.assertTrue(self.kw()["verify"])
 
-    def test_url_with_local_turns_verification_off(self):
-        self.check_doi("10.1/x", production=False, local=True, url="https://localhost:8443")
-        self.assertTrue(self.url().startswith("https://localhost:8443/api/records?"))
-        self.assertIs(self.kw()["verify"], False)
 
     def test_the_url_has_no_double_slash_before_api(self):
         self.check_doi("10.1/x", production=False, local=True)
         self.assertNotIn("//api", self.url())
+
+    def test_check_doi_takes_no_url_argument(self):
+        with self.assertRaises(TypeError):
+            self.check_doi("10.1/x", production=False, url="https://x.example/")
 
     def test_token_header_still_sent(self):
         self.check_doi("10.1/x", production=False, local=True, token="T")

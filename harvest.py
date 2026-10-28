@@ -17,7 +17,7 @@ from caltechdata_api import (
 from wos import get_wos_dois
 from traceback import format_exc
 from utils import format_error
-from doi2rdm_run import convert, Doi2rdmError
+from doi2rdm_run import doi2rdm, Doi2rdmError
 from authors_target import base_url as authors_base_url
 from authors_target import community_id, tls_verify, install_host_guard
 from step_guard import run_step, check_no_dimensions
@@ -435,12 +435,12 @@ def read_outputs():
     return dois, new_dois, existing_dois, arxiv_dois
 
 
-def check_record(data, review_message, token, production=True, local=False, url=None):
+def check_record(data, review_message, token, production=True, local=False):
     title = data["metadata"]["title"]
-    url_base = authors_base_url(production, local, url)
+    base_url = authors_base_url(production, local)
     verify = tls_verify(local)
     result = requests.get(
-        f'{url_base}api/records?q=metadata.title:"{title}"', verify=verify
+        f'{base_url}api/records?q=metadata.title:"{title}"', verify=verify
     )
     if result.status_code == 200:
         result = result.json()
@@ -452,7 +452,7 @@ def check_record(data, review_message, token, production=True, local=False, url=
     headers = {"Authorization": f"Bearer {token}"}
     result = requests.get(
         headers=headers,
-        url=f'{url_base}api/requests/?q=title:"{title}"%20AND%20is_open:true',
+        url=f'{base_url}api/requests/?q=title:"{title}"%20AND%20is_open:true',
         verify=verify,
     )
     if result.status_code == 200:
@@ -462,7 +462,7 @@ def check_record(data, review_message, token, production=True, local=False, url=
             if possible_match["title"] == title:
                 link_id = possible_match["id"]
                 # Needed because https://github.com/inveniosoftware/invenio-communities/issues/1228
-                link = f"{url_base}communities/caltechauthors/requests/{link_id}"
+                link = f"{base_url}communities/caltechauthors/requests/{link_id}"
                 review_message += f"\n\n  ❗❗❗ Duplicate title found in queue: {link}"
     return review_message
 
@@ -525,14 +525,9 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-no-dimensions",
-        help="Skip the Dimensions step (for -test, -local and -url runs "
+        help="Skip the Dimensions step (for -test and -local runs "
         "without a Dimensions key; refused in production)",
         action="store_true",
-    )
-    parser.add_argument(
-        "-url",
-        help="Use the CaltechAUTHORS at this URL, for example an AWS test "
-        "instance; needs AUTHORS_COMMUNITY",
     )
     parser.add_argument(
         "-print", help="Print out DOIs (no harvesting)", action="store_true"
@@ -549,7 +544,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    if args.test or args.local or args.url:
+    if args.test or args.local:
         production = False
     else:
         production = True
@@ -569,11 +564,11 @@ if __name__ == "__main__":
         harvested_dois = infile.read().splitlines()
 
     try:
-        community = community_id(production, args.local, args.url)
-        if args.local or args.url:
+        community = community_id(production, args.local)
+        if args.local:
             # the instance may advertise production's links; never follow them
             install_host_guard(
-                authors_base_url(production, args.local, args.url),
+                authors_base_url(production, args.local),
                 verify=tls_verify(args.local),
             )
     except ValueError as e:
@@ -591,7 +586,7 @@ if __name__ == "__main__":
     else:
         tag = ""
 
-    base_url = authors_base_url(production, args.local, args.url)
+    base_url = authors_base_url(production, args.local)
 
     publish = args.publish
 
@@ -759,10 +754,10 @@ if __name__ == "__main__":
         review_message = review_start
         if doi not in harvested_dois:
             if not check_doi(
-                doi, production=production, token=token, local=args.local, url=args.url
+                doi, production=production, token=token, local=args.local
             ):
                 try:
-                    data = convert(doi)
+                    data = doi2rdm(doi)
                 except Doi2rdmError as e:
                     print(f"error={e.message()}")
                     break
@@ -773,7 +768,6 @@ if __name__ == "__main__":
                         token,
                         production=production,
                         local=args.local,
-                        url=args.url,
                     )
                 except Exception as e:
                     cleaned = format_error(format_exc())

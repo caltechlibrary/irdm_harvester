@@ -68,7 +68,7 @@ class Doi2rdmError(Exception):
         return f"system error with doi2rdm exit {self.returncode} {detail}"
 
 
-def convert(doi, options="options.yaml", command="doi2rdm", run=subprocess.run):
+def doi2rdm(doi, options="options.yaml", command="doi2rdm", run=subprocess.run):
     """Return the RDM record doi2rdm makes for doi, or raise Doi2rdmError.
 
     Standard output is the JSON and nothing else. Standard error is captured;

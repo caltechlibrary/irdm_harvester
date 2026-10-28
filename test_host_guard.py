@@ -188,7 +188,7 @@ class GuardArgumentTests(unittest.TestCase):
                     authors_target.install_host_guard(bad)
 
     def test_production_is_refused_as_a_target(self):
-        # -url is for test instances; production is what no flag means
+        # -local is for test instances; production is what no flag means
         mod, sessions, _, _ = stub_requests()
         with mock.patch.dict(sys.modules, {"requests": mod, "requests.sessions": sessions}):
             for bad in (PRODUCTION + "/", PRODUCTION.upper() + "/", PRODUCTION + ":443/"):

@@ -9,7 +9,7 @@ import stat
 import tempfile
 import unittest
 
-from doi2rdm_run import Doi2rdmError, convert
+from doi2rdm_run import Doi2rdmError, doi2rdm
 
 DOI = "10.1000/example"
 
@@ -40,7 +40,7 @@ def run_fake(testcase, **kw):
 class ConvertTests(unittest.TestCase):
     def test_success_returns_the_record(self):
         cmd = run_fake(self, stdout=json.dumps({"id": 1}))
-        self.assertEqual(convert(DOI, command=cmd), {"id": 1})
+        self.assertEqual(doi2rdm(DOI, command=cmd), {"id": 1})
 
     def test_success_passes_warnings_to_stderr_not_stdout(self):
         cmd = run_fake(self, stdout="{}", stderr="doi2rdm: w\n")
@@ -48,13 +48,13 @@ class ConvertTests(unittest.TestCase):
 
         err = io.StringIO()
         with contextlib.redirect_stderr(err):
-            convert(DOI, command=cmd)
+            doi2rdm(DOI, command=cmd)
         self.assertIn("doi2rdm: w", err.getvalue())
 
     def raises(self, code, stderr="", stdout=""):
         cmd = run_fake(self, stdout=stdout, stderr=stderr, code=code)
         with self.assertRaises(Doi2rdmError) as cm:
-            convert(DOI, command=cmd)
+            doi2rdm(DOI, command=cmd)
         return cm.exception
 
     def test_exit_1_is_not_found(self):
@@ -123,7 +123,7 @@ class ConvertTests(unittest.TestCase):
 
     def test_missing_executable_is_a_system_error(self):
         with self.assertRaises(Doi2rdmError) as cm:
-            convert(DOI, command="/nonexistent/doi2rdm")
+            doi2rdm(DOI, command="/nonexistent/doi2rdm")
         self.assertEqual(cm.exception.kind, "system")
         self.assertIn("system", cm.exception.message().lower())
 
@@ -137,7 +137,7 @@ class RealBinaryTests(unittest.TestCase):
 
     def test_missing_options_file_is_config_66(self):
         with self.assertRaises(Doi2rdmError) as cm:
-            convert(DOI, options="/nonexistent/options.yaml", command=REAL)
+            doi2rdm(DOI, options="/nonexistent/options.yaml", command=REAL)
         self.assertEqual(cm.exception.returncode, 66)
         self.assertEqual(cm.exception.kind, "config")
         self.assertIn("options.yaml", cm.exception.message())
@@ -148,7 +148,7 @@ class RealBinaryTests(unittest.TestCase):
             with open(bad, "w") as f:
                 f.write("a: [unclosed\n")
             with self.assertRaises(Doi2rdmError) as cm:
-                convert(DOI, options=bad, command=REAL)
+                doi2rdm(DOI, options=bad, command=REAL)
         self.assertEqual(cm.exception.returncode, 78)
         self.assertEqual(cm.exception.kind, "config")
         self.assertIn("bad.yaml", cm.exception.message())

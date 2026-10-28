@@ -1,14 +1,13 @@
 """Which CaltechAUTHORS the harvester talks to.
 
-There are four targets:
+There are three targets:
 
   production         no flag
   the dev host       harvest.py -test        (authors.caltechlibrary.dev)
   a local instance   harvest.py -local       (https://127.0.0.1:5000, TLS not
-                     verified; reach a Multipass VM there with local_forward.py)
-  any other instance harvest.py -url URL     (for example an AWS test instance)
+                     verified; forward port 5000 to a Multipass VM yourself)
 
--local and -url need the community id of that instance in AUTHORS_COMMUNITY.
+-local needs the community id of that instance in AUTHORS_COMMUNITY.
 The community ids of production and the dev host are fixed below.
 
 A CaltechAUTHORS built from production's configuration advertises its links
@@ -33,13 +32,11 @@ PRODUCTION_HOST = "authors.library.caltech.edu"
 GUARDED_HOSTS = (PRODUCTION_HOST, "authors.caltechlibrary.dev")
 
 
-def base_url(production=True, local=False, url=None):
+def base_url(production=True, local=False):
     """Return the base URL, with one trailing slash.
 
-    url (a -url value) wins over local, and local over production.
+    local wins over production.
     """
-    if url and url.strip():
-        return url.strip().rstrip("/") + "/"
     if local:
         return LOCAL_URL
     return PRODUCTION_URL if production else DEV_URL
@@ -50,18 +47,18 @@ def tls_verify(local=False):
     return not local
 
 
-def community_id(production=True, local=False, url=None):
+def community_id(production=True, local=False):
     """Return the community id for the target, or raise ValueError.
 
-    A local or -url target has no fixed id: it must be named in the
+    A local target has no fixed id: it must be named in the
     environment, so such a run can never write into the dev or production
     community.
     """
-    if local or (url and url.strip()):
+    if local:
         found = os.environ.get(COMMUNITY_ENV, "").strip()
         if not found:
             raise ValueError(
-                f"-local and -url need {COMMUNITY_ENV} set to the community "
+                f"-local needs {COMMUNITY_ENV} set to the community "
                 "id on that instance"
             )
         return found
@@ -85,7 +82,7 @@ def install_host_guard(target, verify=True):
     if parts.scheme not in ("http", "https") or not parts.hostname:
         raise ValueError(f"the target must be an http(s) URL, got {target!r}")
     if parts.hostname.lower() == PRODUCTION_HOST:
-        raise ValueError("production cannot be a test target; leave -url and -local off")
+        raise ValueError("production cannot be a test target; leave -local off")
 
     import requests.sessions
 

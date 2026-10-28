@@ -27,11 +27,11 @@ def run_step(name, step, *args, **kwargs):
 def check_no_dimensions(no_dimensions, production):
     """Raise ValueError if -no-dimensions is asked for on a production run.
 
-    Skipping the Dimensions step is for -test, -local and -url runs without a
+    Skipping the Dimensions step is for -test and -local runs without a
     key; in production a missing Dimensions step must stay an error.
     """
     if no_dimensions and production:
         raise ValueError(
-            "-no-dimensions is for -test, -local and -url runs only; "
+            "-no-dimensions is for -test and -local runs only; "
             "production always runs the Dimensions step"
         )

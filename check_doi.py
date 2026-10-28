@@ -8,10 +8,10 @@ import requests
 from authors_target import base_url, tls_verify
 
 
-def check_doi(doi, production=True, token=None, local=False, url=None):
+def check_doi(doi, production=True, token=None, local=False):
     # Returns whether or not a DOI has already been added to CaltechAUTHORS
 
-    api = base_url(production, local, url) + "api/records"
+    api = base_url(production, local) + "api/records"
 
     query = f'?q=pids.doi.identifier:"{doi}"&allversions=true'
 
