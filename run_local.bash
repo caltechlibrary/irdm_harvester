@@ -12,8 +12,11 @@
 #
 # USAGE
 #
-#   ./run_local.bash [-h] [-c] DOI [DOI ...]
+#   ./run_local.bash [-h] [-a] [-c] DOI [DOI ...]
 #
+#   -a    start from an empty harvested_dois.txt in the scratch copy, so a DOI
+#         the real list already holds is harvested again (the real list is
+#         never touched)
 #   -c    take the DOI list from CrossRef (harvest.py crossref -print) the way
 #         the workflow does, instead of from the command line
 #   -h    show this help
@@ -43,8 +46,10 @@ HARVEST_ARGS=${HARVEST_ARGS:--local}
 HERE=$(cd "$(dirname "$0")" && pwd)
 
 use_crossref=0
-while getopts "ch" opt; do
+empty_list=0
+while getopts "ach" opt; do
     case $opt in
+    a) empty_list=1 ;;
     c) use_crossref=1 ;;
     h)
         sed -n '3,/^set -u/p' "$0" | sed '$d' | sed 's/^# \{0,1\}//'
@@ -55,7 +60,7 @@ while getopts "ch" opt; do
 done
 shift $((OPTIND - 1))
 if [ "$use_crossref" = 0 ] && [ $# -eq 0 ]; then
-    echo "usage: $0 [-h] [-c] DOI [DOI ...]" >&2
+    echo "usage: $0 [-h] [-a] [-c] DOI [DOI ...]" >&2
     exit 2
 fi
 
@@ -65,6 +70,7 @@ WORK=$(mktemp -d "${TMPDIR:-/tmp}/irdm_harvester_local.XXXXXX") || exit 2
 tar -C "$HERE" --exclude=.git --exclude=.venv --exclude=__pycache__ -cf - . |
     tar -C "$WORK" -xf -
 cd "$WORK" || exit 2
+[ "$empty_list" = 1 ] && : >harvested_dois.txt
 cp harvested_dois.txt harvested_dois.before
 echo "work directory: $WORK"
 
