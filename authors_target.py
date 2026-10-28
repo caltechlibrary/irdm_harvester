@@ -68,13 +68,16 @@ def community_id(production=True, local=False, url=None):
     return PRODUCTION_COMMUNITY if production else DEV_COMMUNITY
 
 
-def install_host_guard(target):
+def install_host_guard(target, verify=True):
     """Send every request meant for a guarded host to target; return an undo.
 
     It wraps requests' Session.request, which every requests call goes
     through, rewriting only the scheme and host of a URL on production's or
     the dev authors host (path, query and arguments are kept). Other hosts
-    (Crossref, ROR, feeds) are left alone. target must be an http(s) URL and
+    (Crossref, ROR, feeds) are left alone. With verify=False (a local
+    instance with a self-signed certificate) it also sets verify=False on
+    every request that ends up at the target host, because some caltechdata_api
+    calls take no verify argument. target must be an http(s) URL and
     must not be production. Installing again replaces the guard rather than
     stacking. Call the returned function to remove it; it is safe to call twice.
     """
@@ -95,6 +98,8 @@ def install_host_guard(target):
             url = urlunsplit(
                 (parts.scheme, parts.netloc, got.path, got.query, got.fragment)
             )
+        if not verify and urlsplit(url).netloc == parts.netloc:
+            kwargs["verify"] = False
         return original(self, method, url, *args, **kwargs)
 
     request._guard_original = original

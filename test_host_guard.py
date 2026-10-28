@@ -140,6 +140,45 @@ class GuardSchemeAndStackingTests(unittest.TestCase):
             self.assertIs(self.Session.request, original, order)
 
 
+class GuardVerifyTests(unittest.TestCase):
+    """verify=False for the target (a self-signed local instance), nowhere else."""
+
+    def setUp(self):
+        mod, sessions, self.Session, self.sent = stub_requests()
+        patcher = mock.patch.dict(
+            sys.modules, {"requests": mod, "requests.sessions": sessions}
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def verify_of(self, i=-1):
+        return self.sent[i][2].get("verify", "unset")
+
+    def test_verify_false_is_set_for_the_target_and_for_rewritten_hosts(self):
+        self.addCleanup(authors_target.install_host_guard(TARGET, verify=False))
+        s = self.Session()
+        s.request("GET", TARGET + "api/records")
+        s.request("POST", PRODUCTION + "/api/records/a/draft/review")
+        self.assertEqual([self.verify_of(0), self.verify_of(1)], [False, False])
+
+    def test_other_hosts_keep_their_own_verification(self):
+        self.addCleanup(authors_target.install_host_guard(TARGET, verify=False))
+        self.Session().request("GET", "https://api.crossref.org/works/1")
+        self.assertEqual(self.verify_of(), "unset")
+
+    def test_by_default_verification_is_untouched(self):
+        self.addCleanup(authors_target.install_host_guard(TARGET))
+        self.Session().request("GET", TARGET + "api/records")
+        self.assertEqual(self.verify_of(), "unset")
+
+    def test_an_explicit_verify_from_the_caller_is_replaced_for_the_target(self):
+        # the target is a self-signed local instance; a caller's verify=True
+        # (the default in caltechdata_api) would fail every request
+        self.addCleanup(authors_target.install_host_guard(TARGET, verify=False))
+        self.Session().request("GET", TARGET + "x", verify=True)
+        self.assertIs(self.verify_of(), False)
+
+
 class GuardArgumentTests(unittest.TestCase):
     def test_a_target_that_is_not_https_url_is_a_value_error(self):
         mod, sessions, _, _ = stub_requests()
