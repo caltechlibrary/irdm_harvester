@@ -1,9 +1,9 @@
 [project]
 name = "irdm-harvester"
 version = "0.2.0"
-description = "Add your description here"
+description = "Automatically harvest publications for an InvenioRDM repository"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.12"
 dependencies = [
     "caltechdata-api>=2.2.0",
     "dimcli",
