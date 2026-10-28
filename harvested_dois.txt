@@ -8661,3 +8661,6 @@ https://doi.org/10.48550/arXiv.2604.04966
 10.1103/zv2n-76n3
 10.21468/scipostphys.15.3.089
 10.21468/scipostphyscodeb.10
+10.1016/j.icarus.2019.03.022
+10.1016/j.icarus.2019.05.008
+10.1016/j.icarus.2019.04.009
