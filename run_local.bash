@@ -60,10 +60,10 @@ if [ "$use_crossref" = 0 ] && [ $# -eq 0 ]; then
 fi
 
 WORK=$(mktemp -d "${TMPDIR:-/tmp}/irdm_harvester_local.XXXXXX") || exit 2
-for f in "$HERE"/*.py "$HERE"/options.yaml "$HERE"/pyproject.toml \
-    "$HERE"/uv.lock "$HERE"/harvested_dois.txt "$HERE"/last_run.txt; do
-    [ -f "$f" ] && cp "$f" "$WORK"/
-done
+# everything harvest.py may read (licenses.csv, options.yaml, ...) but not the
+# git history, the virtual environment or caches
+tar -C "$HERE" --exclude=.git --exclude=.venv --exclude=__pycache__ -cf - . |
+    tar -C "$WORK" -xf -
 cd "$WORK" || exit 2
 cp harvested_dois.txt harvested_dois.before
 echo "work directory: $WORK"

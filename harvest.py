@@ -1,4 +1,4 @@
-import os, csv, json
+import os, csv, json, sys
 import argparse
 import datetime
 import subprocess
@@ -20,6 +20,7 @@ from utils import format_error
 from doi2rdm_run import convert, Doi2rdmError
 from authors_target import base_url as authors_base_url
 from authors_target import community_id, tls_verify, install_host_guard
+from step_guard import run_step, check_no_dimensions
 
 
 def grid_to_ror(grid):
@@ -523,6 +524,12 @@ if __name__ == "__main__":
         action="store_true",
     )
     parser.add_argument(
+        "-no-dimensions",
+        help="Skip the Dimensions step (for -test, -local and -url runs "
+        "without a Dimensions key; refused in production)",
+        action="store_true",
+    )
+    parser.add_argument(
         "-url",
         help="Use the CaltechAUTHORS at this URL, for example an AWS test "
         "instance; needs AUTHORS_COMMUNITY",
@@ -546,6 +553,12 @@ if __name__ == "__main__":
         production = False
     else:
         production = True
+
+    try:
+        check_no_dimensions(args.no_dimensions, production)
+    except ValueError as e:
+        print(f"error= system error {format_error(str(e))}")
+        exit(1)
 
     harvest_type = args.harvest_type
 
@@ -662,7 +675,12 @@ if __name__ == "__main__":
             print(f"error=source and destination records must be provided")
             exit()
     elif harvest_type == "dimensions":
-        dois = get_dimensions()
+        try:
+            dois = run_step("Dimensions harvest", get_dimensions)
+        except Exception:
+            cleaned = format_error(format_exc())
+            print(f"error= system error with the Dimensions harvest {cleaned}")
+            exit(1)
         if args.message:
             review_start = args.message
         else:
@@ -761,14 +779,21 @@ if __name__ == "__main__":
                     cleaned = format_error(format_exc())
                     print(f"error= system error with record checking {cleaned}")
                     break
-                try:
-                    data, review_message = add_dimensions_metadata(
-                        data, doi, review_message
-                    )
-                except Exception as e:
-                    cleaned = format_error(format_exc())
-                    print(f"error= system error with Dimensions metadata {cleaned}")
-                    break
+                if args.no_dimensions:
+                    print("note: -no-dimensions, Dimensions step skipped", file=sys.stderr)
+                else:
+                    try:
+                        data, review_message = run_step(
+                            "Dimensions",
+                            add_dimensions_metadata,
+                            data,
+                            doi,
+                            review_message,
+                        )
+                    except Exception as e:
+                        cleaned = format_error(format_exc())
+                        print(f"error= system error with Dimensions metadata {cleaned}")
+                        break
                 try:
                     data, files = cleanup_metadata(data)
                 except Exception as e:
