@@ -19,7 +19,7 @@ from traceback import format_exc
 from utils import format_error
 from doi2rdm_run import doi2rdm, Doi2rdmError
 from authors_target import base_url as authors_base_url
-from authors_target import community_id, tls_verify
+from authors_target import check_local_links, community_id, tls_verify
 from step_guard import run_step, check_no_dimensions
 
 
@@ -572,6 +572,13 @@ if __name__ == "__main__":
     except ValueError as e:
         print(f"error= system error {format_error(str(e))}")
         exit()
+
+    if args.local:
+        try:
+            check_local_links(requests.get)
+        except ValueError as e:
+            print(f"error= system error {format_error(str(e))}")
+            exit(1)
 
     if args.tag:
         if args.tag != "":

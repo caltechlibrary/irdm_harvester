@@ -16,10 +16,13 @@ instance built from production's configuration returns production's hostname
 in them. For -local set SITE_UI_URL to https://127.0.0.1:5000 and SITE_API_URL
 to https://127.0.0.1:5000/api in the instance's invenio.cfg. Nothing in the
 harvester checks this: a -local run against an instance that still advertises
-production's hostname follows those links and writes to production.
+production's hostname follows those links and writes to production, so a
+-local run first asks the instance which host it advertises
+(check_local_links) and stops if that is not its own.
 """
 
 import os
+from urllib.parse import urlsplit
 
 PRODUCTION_URL = "https://authors.library.caltech.edu/"
 DEV_URL = "https://authors.caltechlibrary.dev/"
@@ -60,3 +63,43 @@ def community_id(production=True, local=False):
             )
         return found
     return PRODUCTION_COMMUNITY if production else DEV_COMMUNITY
+
+
+def check_local_links(get):
+    """Raise ValueError unless the local instance advertises its own address.
+
+    caltechdata_api follows the links the server returns, so an instance still
+    configured with production's SITE_UI_URL and SITE_API_URL would send a
+    -local write to production.
+
+    @param get {callable} requests.get, or a stand-in with its signature
+    @returns {None} nothing when links.self is on the local host
+    @example
+        check_local_links(requests.get)
+    """
+    local_host = urlsplit(LOCAL_URL).netloc
+    fix = (
+        f"set SITE_UI_URL to https://{local_host} and SITE_API_URL to "
+        f"https://{local_host}/api in the instance's invenio.cfg"
+    )
+    try:
+        response = get(LOCAL_URL + "api/records?size=1", verify=False)
+    except Exception as e:
+        raise ValueError(f"cannot reach the -local instance at {local_host}: {e}")
+    if response.status_code != 200:
+        raise ValueError(
+            f"the -local instance at {local_host} answered "
+            f"{response.status_code}, so its links cannot be checked"
+        )
+    try:
+        advertised = urlsplit(response.json()["links"]["self"]).netloc
+    except (KeyError, TypeError, ValueError):
+        raise ValueError(
+            f"the -local instance at {local_host} returned no links.self, "
+            "so its links cannot be checked"
+        )
+    if advertised != local_host:
+        raise ValueError(
+            f"the -local instance advertises {advertised or 'no host'} in its "
+            f"links, not {local_host}; {fix}"
+        )

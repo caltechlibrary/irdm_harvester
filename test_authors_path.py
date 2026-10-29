@@ -27,6 +27,7 @@ import authors_target
 HERE = Path(__file__).resolve().parent
 LOCAL = "https://127.0.0.1:5000/"
 DEV = "https://authors.caltechlibrary.dev/"
+PRODUCTION = "https://authors.library.caltech.edu/"
 SOURCE = "src11-11111"
 DESTINATION = "dst22-22222"
 
@@ -41,7 +42,7 @@ class Response:
         return self._payload
 
 
-def run_harvest(*args, source_status=200, draft_status=200):
+def run_harvest(*args, source_status=200, draft_status=200, advertised=LOCAL):
     """Run harvest.py with ARGS; return (requests, library calls, output)."""
     gets, calls = [], []
 
@@ -51,6 +52,8 @@ def run_harvest(*args, source_status=200, draft_status=200):
             return Response(source_status, {"files": {"default_preview": "a.txt"}})
         if url.endswith(f"api/records/{SOURCE}/draft"):
             return Response(draft_status, {"files": {"default_preview": "a.txt"}})
+        if "size=1" in url:
+            return Response(200, {"links": {"self": advertised + "api/records"}})
         return Response(200, {})
 
     def library(name, result=None):
@@ -152,6 +155,27 @@ class LocalTests(unittest.TestCase):
         self.assertEqual(len(drafts), 1)
         self.assertIs(drafts[0].get("verify", True), False)
         self.assertEqual(drafts[0]["headers"]["Authorization"], "Bearer t")
+
+
+class LocalLinksCheckTests(unittest.TestCase):
+    """-local stops before any write when the instance advertises another host."""
+
+    def test_a_local_run_checks_the_instance_first(self):
+        gets, calls, out = run_harvest("-local")
+        self.assertTrue(gets[0][0].startswith(LOCAL + "api/records?"), gets[0][0])
+        self.assertIn("size=1", gets[0][0])
+
+    def test_an_instance_advertising_production_is_never_written_to(self):
+        gets, calls, out = run_harvest("-local", advertised=PRODUCTION)
+        self.assertIn("error=", out)
+        self.assertIn("SITE_UI_URL", out)
+        self.assertEqual(calls, [])
+        for url, kw in gets:
+            self.assertNotIn("api/records/" + SOURCE, url)
+
+    def test_the_dev_host_is_not_checked(self):
+        gets, calls, out = run_harvest("-test")
+        self.assertFalse([u for u, kw in gets if "size=1" in u])
 
 
 class DevTests(unittest.TestCase):

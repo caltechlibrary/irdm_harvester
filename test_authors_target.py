@@ -14,6 +14,7 @@ import authors_target
 from authors_target import (
     COMMUNITY_ENV,
     base_url,
+    check_local_links,
     community_id,
     tls_verify,
 )
@@ -109,6 +110,70 @@ class CommunityTests(unittest.TestCase):
         except ValueError:
             return
         self.assertNotIn(got, (PROD_COMMUNITY, DEV_COMMUNITY))
+
+
+class LocalLinksTests(unittest.TestCase):
+    """check_local_links refuses an instance that advertises another host."""
+
+    def getter(self, status=200, payload=None):
+        self.calls = []
+
+        def get(url, **kw):
+            self.calls.append((url, kw))
+            resp = types.SimpleNamespace(status_code=status)
+            resp.json = lambda: payload
+            resp.text = str(payload)
+            return resp
+
+        return get
+
+    def advertising(self, host):
+        return {"links": {"self": f"{host}api/records?page=1&size=1"}}
+
+    def test_an_instance_advertising_itself_passes(self):
+        get = self.getter(payload=self.advertising(LOCAL))
+        check_local_links(get)
+
+    def test_the_request_goes_to_the_local_instance_unverified(self):
+        get = self.getter(payload=self.advertising(LOCAL))
+        check_local_links(get)
+        (url, kw), = self.calls
+        self.assertTrue(url.startswith(LOCAL + "api/records"), url)
+        self.assertIs(kw.get("verify", True), False)
+
+    def test_an_instance_advertising_production_is_refused(self):
+        get = self.getter(payload=self.advertising(PRODUCTION))
+        with self.assertRaises(ValueError) as caught:
+            check_local_links(get)
+        message = str(caught.exception)
+        self.assertIn("authors.library.caltech.edu", message)
+        self.assertIn("127.0.0.1:5000", message)
+        self.assertIn("SITE_UI_URL", message)
+        self.assertIn("SITE_API_URL", message)
+
+    def test_a_look_alike_host_is_refused(self):
+        # a prefix match on the host would accept this
+        get = self.getter(payload=self.advertising("https://127.0.0.1:50001/"))
+        with self.assertRaises(ValueError):
+            check_local_links(get)
+
+    def test_an_error_status_is_refused(self):
+        # the payload alone would pass, so only the status can refuse it
+        get = self.getter(status=500, payload=self.advertising(LOCAL))
+        with self.assertRaises(ValueError):
+            check_local_links(get)
+
+    def test_a_reply_without_links_is_refused(self):
+        with self.assertRaises(ValueError):
+            check_local_links(self.getter(payload={}))
+
+    def test_an_unreachable_instance_is_refused(self):
+        def get(url, **kw):
+            raise ConnectionError("refused")
+
+        with self.assertRaises(ValueError) as caught:
+            check_local_links(get)
+        self.assertIn("127.0.0.1:5000", str(caught.exception))
 
 
 class CheckDoiTests(unittest.TestCase):
