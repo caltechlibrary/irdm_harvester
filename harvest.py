@@ -19,7 +19,7 @@ from traceback import format_exc
 from utils import format_error
 from doi2rdm_run import doi2rdm, Doi2rdmError
 from authors_target import base_url as authors_base_url
-from authors_target import community_id, tls_verify, install_host_guard
+from authors_target import community_id, tls_verify
 from step_guard import run_step, check_no_dimensions
 
 
@@ -476,6 +476,7 @@ def edit_destination(
     default_preview=None,
     publish=False,
     local=False,
+    verify=True,
 ):
     # Write metadata (and optionally files) as a new version of an existing record
     try:
@@ -490,6 +491,7 @@ def edit_destination(
             default_preview=default_preview,
             publish=publish,
             local=local,
+            verify=verify,
         )
         return True
     except Exception as e:
@@ -520,7 +522,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "-local",
         help="Use a local CaltechAUTHORS at https://127.0.0.1:5000 (TLS not "
-        "verified); needs AUTHORS_COMMUNITY",
+        "verified); needs AUTHORS_COMMUNITY and an instance whose "
+        "SITE_UI_URL and SITE_API_URL are https://127.0.0.1:5000 (see "
+        "authors_target.py)",
         action="store_true",
     )
     parser.add_argument(
@@ -565,12 +569,6 @@ if __name__ == "__main__":
 
     try:
         community = community_id(production, args.local)
-        if args.local:
-            # the instance may advertise production's links; never follow them
-            install_host_guard(
-                authors_base_url(production, args.local),
-                verify=tls_verify(args.local),
-            )
     except ValueError as e:
         print(f"error= system error {format_error(str(e))}")
         exit()
@@ -593,7 +591,9 @@ if __name__ == "__main__":
     # Optional existing record to update instead of creating a new record
     destination = args.authors_destination
     if destination:
-        response = requests.get(f"{base_url}api/records/{destination}")
+        response = requests.get(
+            f"{base_url}api/records/{destination}", verify=tls_verify(args.local)
+        )
         if response.status_code != 200:
             print(f"error=destination record {destination} not found")
             exit()
@@ -615,7 +615,9 @@ if __name__ == "__main__":
         dois = []
         if args.authors_source and destination:
             source = args.authors_source
-            response = requests.get(f"{base_url}api/records/{source}")
+            response = requests.get(
+                f"{base_url}api/records/{source}", verify=tls_verify(args.local)
+            )
             if response.status_code == 200:
                 source_record = response.json()
             else:
@@ -624,7 +626,9 @@ if __name__ == "__main__":
                     "Authorization": f"Bearer {token}",
                 }
                 response = requests.get(
-                    f"{base_url}api/records/{source}/draft", headers=headers
+                    f"{base_url}api/records/{source}/draft",
+                    headers=headers,
+                    verify=tls_verify(args.local),
                 )
                 if response.status_code == 200:
                     source_record = response.json()
@@ -635,7 +639,12 @@ if __name__ == "__main__":
                 try:
                     filenames = sorted(
                         get_files_from_record(
-                            source, production=production, authors=True, token=token
+                            source,
+                            production=production,
+                            authors=True,
+                            token=token,
+                            local=args.local,
+                            verify=tls_verify(args.local),
                         )
                     )
                     download_files_from_record(
@@ -645,6 +654,8 @@ if __name__ == "__main__":
                         production=production,
                         authors=True,
                         token=token,
+                        local=args.local,
+                        verify=tls_verify(args.local),
                     )
                     files = [str(Path(folder) / name) for name in filenames]
                     print(f"Downloaded {len(files)} file(s) from record {source}")
@@ -665,6 +676,7 @@ if __name__ == "__main__":
                     default_preview=default_preview,
                     publish=publish,
                     local=args.local,
+                    verify=tls_verify(args.local),
                 )
         else:
             print(f"error=source and destination records must be provided")
