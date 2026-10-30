@@ -17,7 +17,7 @@ from caltechdata_api import (
 )
 from wos import get_wos_dois
 from traceback import format_exc
-from utils import format_error
+from utils import format_error, match_license, read_licenses
 
 
 def grid_to_ror(grid):
@@ -282,11 +282,7 @@ def cleanup_metadata(metadata, production=True):
             g_list.append({"id": group})
         metadata["custom_fields"]["caltech:groups"] = g_list
     # Clean up licenses
-    licenses = {}
-    with open("licenses.csv") as infile:
-        reader = csv.DictReader(infile, delimiter=",")
-        for row in reader:
-            licenses[row["props__url"]] = row["id"]
+    licenses, normalized_licenses = read_licenses()
     rights = []
     files = None
     if "rights" in metadata["metadata"]:
@@ -294,8 +290,8 @@ def cleanup_metadata(metadata, production=True):
             if "link" in f:
                 link = f["link"]
                 # We need to have a license known to RDM
-                if link in licenses:
-                    license_id = licenses[link]
+                license_id = match_license(link, licenses, normalized_licenses)
+                if license_id is not None:
                     rights.append({"id": license_id})
                     if f["description"]["en"] == "vor":
                         doi = metadata["pids"]["doi"]["identifier"]
