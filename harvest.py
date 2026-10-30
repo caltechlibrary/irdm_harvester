@@ -1,4 +1,5 @@
 import os, csv, json
+import unicodedata
 import argparse
 import datetime
 import subprocess
@@ -58,6 +59,54 @@ def match_orcid(creator, orcid, production=True):
             person["identifiers"] = result["identifiers"]
 
 
+def name_key(name):
+    # Lowercase letters only, with accents removed, for comparing names
+    if not name:
+        return ""
+    name = unicodedata.normalize("NFKD", name)
+    return "".join(c for c in name.lower() if c.isalpha() and c.isascii())
+
+
+def creator_orcid(creator):
+    for identifier in creator["person_or_org"].get("identifiers", []):
+        if identifier.get("scheme") == "orcid":
+            return normalize_orcid(identifier["identifier"])
+    return None
+
+
+def authors_match(dimensions_author, creator):
+    person = creator["person_or_org"]
+    orcid = creator_orcid(creator)
+    if orcid and dimensions_author.get("orcid"):
+        if orcid in [normalize_orcid(o) for o in dimensions_author["orcid"]]:
+            return True
+    family = name_key(person.get("family_name"))
+    if family == "" or family != name_key(dimensions_author.get("last_name")):
+        return False
+    # Check first initials when both are available
+    given = name_key(person.get("given_name"))
+    dimensions_given = name_key(dimensions_author.get("first_name"))
+    if given and dimensions_given:
+        return given[0] == dimensions_given[0]
+    return True
+
+
+def match_dimensions_authors(dimensions_authors, existing_authors):
+    # Pair Dimensions authors with CrossRef creators by ORCID or name.
+    # Author lists are in the same order, so we only search forward from
+    # the last match. This lets us skip collaboration names and authors
+    # missing from Dimensions, and handles authors with the same name.
+    pairs = []
+    next_position = 0
+    for dimensions_author in dimensions_authors:
+        for position in range(next_position, len(existing_authors)):
+            if authors_match(dimensions_author, existing_authors[position]):
+                pairs.append((dimensions_author, existing_authors[position]))
+                next_position = position + 1
+                break
+    return pairs
+
+
 def add_dimensions_metadata(metadata, doi, review_message):
     dimkey = os.getenv("DIMKEY")
     endpoint = "https://cris-api.dimensions.ai/v3"
@@ -98,63 +147,58 @@ def add_dimensions_metadata(metadata, doi, review_message):
     # Can go away once Dimensions has ROR
     #    add_affil = False
     author_mismatch_is_ok = False
-    position_in_crossref = 0
     # Messages about data added from Dimensions, so we only warn about
     # an author count mismatch when something was actually added
     dimensions_message = ""
-    if len(dimensions_authors) < len(existing_authors):
+    if len(dimensions_authors) == len(existing_authors):
+        pairs = list(zip(dimensions_authors, existing_authors))
+    elif len(dimensions_authors) < len(existing_authors):
+        # Usually due to a collaboration name, but Dimensions can also be
+        # missing authors, so match by ORCID or name instead of position
         author_mismatch_is_ok = True
-        # We want to check for the case where the first author is a
-        # collaboration. This isn't perfect, but it is a start.
-        dimensions_first_author = dimensions_authors[0].get("last_name")
-        existing_first_author = existing_authors[1]["person_or_org"].get("family_name")
-        if dimensions_first_author == existing_first_author:
-            position_in_crossref = 1
-    if len(dimensions_authors) == len(existing_authors) or author_mismatch_is_ok:
-        for position in range(len(dimensions_authors)):
-            author = existing_authors[position_in_crossref]["person_or_org"]
-            dimensions_author = dimensions_authors[position]
-            if "identifiers" not in author:
-                if dimensions_author["orcid"] not in [[], None]:
+        pairs = match_dimensions_authors(dimensions_authors, existing_authors)
+    else:
+        pairs = []
+    for dimensions_author, creator in pairs:
+        author = creator["person_or_org"]
+        if "identifiers" not in author:
+            if dimensions_author["orcid"] not in [[], None]:
+                dimensions_message = (
+                    dimensions_message
+                    + f"\n\n ORCID added from Dimensions: {dimensions_author['orcid'][0]}"
+                )
+                author["identifiers"] = [
+                    {"scheme": "orcid", "identifier": dimensions_author["orcid"][0]}
+                ]
+        if "affiliations" not in creator:
+            affiliations = []
+            if dimensions_author["affiliations"] not in [[], None]:
+                for affiliation in dimensions_author["affiliations"]:
                     dimensions_message = (
                         dimensions_message
-                        + f"\n\n ORCID added from Dimensions: {dimensions_author['orcid'][0]}"
+                        + f"\n\n Affiliation added from Dimensions based on raw data: {affiliation['raw_affiliation']}"
                     )
-                    author["identifiers"] = [
-                        {"scheme": "orcid", "identifier": dimensions_author["orcid"][0]}
-                    ]
-            if "affiliations" not in existing_authors[position_in_crossref]:
-                affiliations = []
-                if dimensions_author["affiliations"] not in [[], None]:
-                    for affiliation in dimensions_author["affiliations"]:
-                        dimensions_message = (
-                            dimensions_message
-                            + f"\n\n Affiliation added from Dimensions based on raw data: {affiliation['raw_affiliation']}"
-                        )
-                        affil = {}
-                        if "id" in affiliation:
-                            if affiliation["id"] is not None:
-                                if affiliation["id"] == "grid.20861.3d":
-                                    affil["id"] = "05dxps055"
-                                elif add_affil:
-                                    ror = grid_to_ror(affiliation["id"])
-                                    if ror is not None:
-                                        affil["id"] = ror
-                        if "raw_affiliation" in affiliation:
-                            raw = affiliation["raw_affiliation"]
-                            affil["name"] = raw
-                            if "91109" in raw:
-                                affil["id"] = "027k65916"
-                            if "Jet Propulsion Laboratory" in raw:
-                                affil["id"] = "027k65916"
-                            if "JPL" in raw:
-                                affil["id"] = "027k65916"
-                        if affil not in affiliations:
-                            affiliations.append(affil)
-                    existing_authors[position_in_crossref][
-                        "affiliations"
-                    ] = affiliations
-            position_in_crossref += 1
+                    affil = {}
+                    if "id" in affiliation:
+                        if affiliation["id"] is not None:
+                            if affiliation["id"] == "grid.20861.3d":
+                                affil["id"] = "05dxps055"
+                            elif add_affil:
+                                ror = grid_to_ror(affiliation["id"])
+                                if ror is not None:
+                                    affil["id"] = ror
+                    if "raw_affiliation" in affiliation:
+                        raw = affiliation["raw_affiliation"]
+                        affil["name"] = raw
+                        if "91109" in raw:
+                            affil["id"] = "027k65916"
+                        if "Jet Propulsion Laboratory" in raw:
+                            affil["id"] = "027k65916"
+                        if "JPL" in raw:
+                            affil["id"] = "027k65916"
+                    if affil not in affiliations:
+                        affiliations.append(affil)
+                creator["affiliations"] = affiliations
     if author_mismatch_is_ok and dimensions_message:
         review_message = (
             review_message

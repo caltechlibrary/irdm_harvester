@@ -11,3 +11,12 @@ dependencies = [
 
 [tool.uv.sources]
 dimcli = { git = "https://github.com/caltechlibrary/dimcli", rev = "cris-auth" }
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
