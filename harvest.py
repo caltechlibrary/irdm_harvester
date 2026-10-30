@@ -569,7 +569,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-write-local",
-        help="Write DOIs to local file (not using a GitHub workflow)",
+        help="Write DOIs to local file (not using a GitHub workflow). Always on for doi_list unless -test",
         action="store_true",
     )
     args = parser.parse_args()
@@ -833,7 +833,12 @@ if __name__ == "__main__":
                         written = False
                 if written:
                     print("doi=", doi)
-                    if args.write_local:
+                    # doi_list only runs locally, so always record DOIs
+                    # (except on the test server, which would make production
+                    # harvests skip them)
+                    if args.write_local or (
+                        harvest_type == "doi_list" and production
+                    ):
                         with open("harvested_dois.txt", "a") as outfile:
                             outfile.write(f"{doi}\n")
             else:
