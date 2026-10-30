@@ -99,13 +99,10 @@ def add_dimensions_metadata(metadata, doi, review_message):
     #    add_affil = False
     author_mismatch_is_ok = False
     position_in_crossref = 0
+    # Messages about data added from Dimensions, so we only warn about
+    # an author count mismatch when something was actually added
+    dimensions_message = ""
     if len(dimensions_authors) < len(existing_authors):
-        review_message = (
-            review_message
-            + """ ⚠️⚠️⚠️  The Dimensions and CrossRef author count is off.
-            This is probably due to a collaboration name, but please 
-            manually confirm the author affiliations are correct."""
-        )
         author_mismatch_is_ok = True
         # We want to check for the case where the first author is a
         # collaboration. This isn't perfect, but it is a start.
@@ -119,8 +116,8 @@ def add_dimensions_metadata(metadata, doi, review_message):
             dimensions_author = dimensions_authors[position]
             if "identifiers" not in author:
                 if dimensions_author["orcid"] not in [[], None]:
-                    review_message = (
-                        review_message
+                    dimensions_message = (
+                        dimensions_message
                         + f"\n\n ORCID added from Dimensions: {dimensions_author['orcid'][0]}"
                     )
                     author["identifiers"] = [
@@ -130,8 +127,8 @@ def add_dimensions_metadata(metadata, doi, review_message):
                 affiliations = []
                 if dimensions_author["affiliations"] not in [[], None]:
                     for affiliation in dimensions_author["affiliations"]:
-                        review_message = (
-                            review_message
+                        dimensions_message = (
+                            dimensions_message
                             + f"\n\n Affiliation added from Dimensions based on raw data: {affiliation['raw_affiliation']}"
                         )
                         affil = {}
@@ -158,6 +155,14 @@ def add_dimensions_metadata(metadata, doi, review_message):
                         "affiliations"
                     ] = affiliations
             position_in_crossref += 1
+    if author_mismatch_is_ok and dimensions_message:
+        review_message = (
+            review_message
+            + """ ⚠️⚠️⚠️  The Dimensions and CrossRef author count is off.
+            This is probably due to a collaboration name, but please 
+            manually confirm the author affiliations are correct."""
+        )
+    review_message = review_message + dimensions_message
     return metadata, review_message
 
 
