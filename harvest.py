@@ -1,4 +1,4 @@
-import os, csv, json
+import os, csv, json, sys
 import argparse
 import datetime
 import subprocess
@@ -17,6 +17,10 @@ from caltechdata_api import (
 from wos import get_wos_dois
 from traceback import format_exc
 from utils import format_error
+from doi2rdm_run import doi2rdm, Doi2rdmError
+from authors_target import base_url as authors_base_url
+from authors_target import check_local_links, community_id, tls_verify
+from step_guard import run_step, check_no_dimensions
 
 
 def grid_to_ror(grid):
@@ -431,13 +435,13 @@ def read_outputs():
     return dois, new_dois, existing_dois, arxiv_dois
 
 
-def check_record(data, review_message, token, production=True):
+def check_record(data, review_message, token, production=True, local=False):
     title = data["metadata"]["title"]
-    if production == False:
-        base_url = "https://authors.caltechlibrary.dev/"
-    else:
-        base_url = "https://authors.library.caltech.edu/"
-    result = requests.get(f'{base_url}api/records?q=metadata.title:"{title}"')
+    base_url = authors_base_url(production, local)
+    verify = tls_verify(local)
+    result = requests.get(
+        f'{base_url}api/records?q=metadata.title:"{title}"', verify=verify
+    )
     if result.status_code == 200:
         result = result.json()
         if result["hits"]["total"] > 0:
@@ -449,6 +453,7 @@ def check_record(data, review_message, token, production=True):
     result = requests.get(
         headers=headers,
         url=f'{base_url}api/requests/?q=title:"{title}"%20AND%20is_open:true',
+        verify=verify,
     )
     if result.status_code == 200:
         result = result.json()
@@ -470,6 +475,8 @@ def edit_destination(
     files=None,
     default_preview=None,
     publish=False,
+    local=False,
+    verify=True,
 ):
     # Write metadata (and optionally files) as a new version of an existing record
     try:
@@ -483,6 +490,8 @@ def edit_destination(
             files=files,
             default_preview=default_preview,
             publish=publish,
+            local=local,
+            verify=verify,
         )
         return True
     except Exception as e:
@@ -511,6 +520,20 @@ if __name__ == "__main__":
     parser.add_argument("-report", help="Generate a report only", action="store_true")
     parser.add_argument("-test", help="Test mode", action="store_true")
     parser.add_argument(
+        "-local",
+        help="Use a local CaltechAUTHORS at https://127.0.0.1:5000 (TLS not "
+        "verified); needs AUTHORS_COMMUNITY and an instance whose "
+        "SITE_UI_URL and SITE_API_URL are https://127.0.0.1:5000 (see "
+        "authors_target.py)",
+        action="store_true",
+    )
+    parser.add_argument(
+        "-no-dimensions",
+        help="Skip the Dimensions step (for -test and -local runs "
+        "without a Dimensions key; refused in production)",
+        action="store_true",
+    )
+    parser.add_argument(
         "-print", help="Print out DOIs (no harvesting)", action="store_true"
     )
     parser.add_argument(
@@ -525,10 +548,16 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    if args.test:
+    if args.test or args.local:
         production = False
     else:
         production = True
+
+    try:
+        check_no_dimensions(args.no_dimensions, production)
+    except ValueError as e:
+        print(f"error= system error {format_error(str(e))}")
+        exit(1)
 
     harvest_type = args.harvest_type
 
@@ -538,10 +567,18 @@ if __name__ == "__main__":
     with open("harvested_dois.txt") as infile:
         harvested_dois = infile.read().splitlines()
 
-    if production:
-        community = "aedd135f-227e-4fdf-9476-5b3fd011bac6"
-    else:
-        community = "fb980d43-af44-48bc-bdd6-f785653038b8"
+    try:
+        community = community_id(production, args.local)
+    except ValueError as e:
+        print(f"error= system error {format_error(str(e))}")
+        exit()
+
+    if args.local:
+        try:
+            check_local_links(requests.get)
+        except ValueError as e:
+            print(f"error= system error {format_error(str(e))}")
+            exit(1)
 
     if args.tag:
         if args.tag != "":
@@ -554,17 +591,16 @@ if __name__ == "__main__":
     else:
         tag = ""
 
-    if production == False:
-        base_url = "https://authors.caltechlibrary.dev/"
-    else:
-        base_url = "https://authors.library.caltech.edu/"
+    base_url = authors_base_url(production, args.local)
 
     publish = args.publish
 
     # Optional existing record to update instead of creating a new record
     destination = args.authors_destination
     if destination:
-        response = requests.get(f"{base_url}api/records/{destination}")
+        response = requests.get(
+            f"{base_url}api/records/{destination}", verify=tls_verify(args.local)
+        )
         if response.status_code != 200:
             print(f"error=destination record {destination} not found")
             exit()
@@ -586,7 +622,9 @@ if __name__ == "__main__":
         dois = []
         if args.authors_source and destination:
             source = args.authors_source
-            response = requests.get(f"{base_url}api/records/{source}")
+            response = requests.get(
+                f"{base_url}api/records/{source}", verify=tls_verify(args.local)
+            )
             if response.status_code == 200:
                 source_record = response.json()
             else:
@@ -595,7 +633,9 @@ if __name__ == "__main__":
                     "Authorization": f"Bearer {token}",
                 }
                 response = requests.get(
-                    f"{base_url}api/records/{source}/draft", headers=headers
+                    f"{base_url}api/records/{source}/draft",
+                    headers=headers,
+                    verify=tls_verify(args.local),
                 )
                 if response.status_code == 200:
                     source_record = response.json()
@@ -606,7 +646,12 @@ if __name__ == "__main__":
                 try:
                     filenames = sorted(
                         get_files_from_record(
-                            source, production=production, authors=True, token=token
+                            source,
+                            production=production,
+                            authors=True,
+                            token=token,
+                            local=args.local,
+                            verify=tls_verify(args.local),
                         )
                     )
                     download_files_from_record(
@@ -616,6 +661,8 @@ if __name__ == "__main__":
                         production=production,
                         authors=True,
                         token=token,
+                        local=args.local,
+                        verify=tls_verify(args.local),
                     )
                     files = [str(Path(folder) / name) for name in filenames]
                     print(f"Downloaded {len(files)} file(s) from record {source}")
@@ -635,12 +682,19 @@ if __name__ == "__main__":
                     files=files,
                     default_preview=default_preview,
                     publish=publish,
+                    local=args.local,
+                    verify=tls_verify(args.local),
                 )
         else:
             print(f"error=source and destination records must be provided")
             exit()
     elif harvest_type == "dimensions":
-        dois = get_dimensions()
+        try:
+            dois = run_step("Dimensions harvest", get_dimensions)
+        except Exception:
+            cleaned = format_error(format_exc())
+            print(f"error= system error with the Dimensions harvest {cleaned}")
+            exit(1)
         if args.message:
             review_start = args.message
         else:
@@ -718,36 +772,41 @@ if __name__ == "__main__":
         doi = normalize_doi(doi)
         review_message = review_start
         if doi not in harvested_dois:
-            if not check_doi(doi, production=production, token=token):
+            if not check_doi(
+                doi, production=production, token=token, local=args.local
+            ):
                 try:
-                    transformed = subprocess.check_output(
-                        ["doi2rdm", "options.yaml", doi]
-                    )
-                    data = transformed.decode("utf-8")
-                    data = json.loads(data)
-                except subprocess.CalledProcessError as e:
-                    if e.returncode == 2:
-                        print(f"error=DOI {doi} not found in Crossref or DataCite")
-                    else:
-                        cleaned = format_error(format_exc())
-                        print(f"error= system error with doi2rdm {cleaned}")
+                    data = doi2rdm(doi)
+                except Doi2rdmError as e:
+                    print(f"error={e.message()}")
                     break
                 try:
                     review_message = check_record(
-                        data, review_message, token, production=production
+                        data,
+                        review_message,
+                        token,
+                        production=production,
+                        local=args.local,
                     )
                 except Exception as e:
                     cleaned = format_error(format_exc())
                     print(f"error= system error with record checking {cleaned}")
                     break
-                try:
-                    data, review_message = add_dimensions_metadata(
-                        data, doi, review_message
-                    )
-                except Exception as e:
-                    cleaned = format_error(format_exc())
-                    print(f"error= system error with Dimensions metadata {cleaned}")
-                    break
+                if args.no_dimensions:
+                    print("note: -no-dimensions, Dimensions step skipped", file=sys.stderr)
+                else:
+                    try:
+                        data, review_message = run_step(
+                            "Dimensions",
+                            add_dimensions_metadata,
+                            data,
+                            doi,
+                            review_message,
+                        )
+                    except Exception as e:
+                        cleaned = format_error(format_exc())
+                        print(f"error= system error with Dimensions metadata {cleaned}")
+                        break
                 try:
                     data, files = cleanup_metadata(data)
                 except Exception as e:
@@ -762,6 +821,7 @@ if __name__ == "__main__":
                         production=production,
                         files=files,
                         publish=publish,
+                        local=args.local,
                     )
                 else:
                     try:
@@ -774,6 +834,8 @@ if __name__ == "__main__":
                             review_message=review_message,
                             files=files,
                             publish=publish,
+                            local=args.local,
+                            verify=tls_verify(args.local),
                         )
                         written = True
                     except Exception as e:

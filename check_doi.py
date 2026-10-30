@@ -5,14 +5,13 @@ import os
 
 import requests
 
+from authors_target import base_url, tls_verify
 
-def check_doi(doi, production=True, token=None):
+
+def check_doi(doi, production=True, token=None, local=False):
     # Returns whether or not a DOI has already been added to CaltechAUTHORS
 
-    if production == True:
-        url = "https://authors.library.caltech.edu/api/records"
-    else:
-        url = "https://authors.caltechlibrary.dev/api/records"
+    api = base_url(production, local) + "api/records"
 
     query = f'?q=pids.doi.identifier:"{doi}"&allversions=true'
 
@@ -21,7 +20,9 @@ def check_doi(doi, production=True, token=None):
     else:
         headers = {}
 
-    response = requests.get(url + query, headers=headers)
+    response = requests.get(
+        api + query, headers=headers, verify=tls_verify(local)
+    )
     if response.status_code != 200:
         raise Exception(response.text)
     else:
